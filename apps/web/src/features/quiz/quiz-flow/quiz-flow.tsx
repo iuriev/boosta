@@ -137,7 +137,9 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
         setLeaving(true);
         clearQuizProgress();
         router.replace(startWithNotice('quiz-updated'));
-        // Drops the pages the router has cached with the replaced quiz.
+        // Drops the pages the router has cached with the replaced quiz: a
+        // start page reached with the back button would otherwise begin the
+        // old quiz again and be sent straight back to the start.
         router.refresh();
         return;
       }
