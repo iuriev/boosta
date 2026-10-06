@@ -69,8 +69,9 @@ The report text differs for Male and Female.
 | `docker compose up --build`                  | The whole system in containers                                |
 | `pnpm dev`                                   | API and web in watch mode (`dev:api`, `dev:web` for one)      |
 | `pnpm db:up` / `pnpm db:down`                | Start / stop the development PostgreSQL                       |
-| `pnpm test`                                  | Unit tests                                                    |
+| `pnpm test`                                  | Unit tests of the API and component tests of the web app      |
 | `pnpm test:e2e`                              | API end-to-end tests on a throwaway PostgreSQL (needs Docker) |
+| `pnpm test:browser`                          | Browser test of the whole funnel (needs the system running)   |
 | `pnpm lint` / `pnpm lint:fix`                | ESLint, including import order                                |
 | `pnpm format` / `pnpm format:check`          | Prettier                                                      |
 | `pnpm typecheck`                             | TypeScript in every package                                   |
@@ -80,17 +81,20 @@ The report text differs for Male and Female.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org); a git hook checks the
 message and formats staged files. CI (GitHub Actions) runs lint, typecheck, all tests and the
-build, and starts the Docker setup on an empty database.
+build, then starts the Docker setup on an empty database and runs the browser test against it.
+
+The browser test needs Chromium once: `pnpm --filter @boosta/web exec playwright install chromium`.
 
 ## Key architectural decisions
 
 1. **A quiz version is immutable data.** One database row holds the whole quiz as JSON: questions
    with stable keys, options with scores, and the level threshold. Versions are published by
    migrations and never edited (a database trigger enforces it); changing the quiz means publishing
-   a new version.
+   a new version. The document names its own format (`schemaVersion`), so a future structure can
+   live next to the current one.
 2. **An attempt stores raw answers and nothing derived.** It records the quiz version, the gender
-   and one row per answer. No score or report is stored, answers cannot be edited, and attempts are
-   never deleted: on a retake the newest attempt becomes the current one.
+   and one row per answer. No score or report is stored, and attempts are never deleted. Database
+   triggers keep an attempt's version, gender and answers as they were submitted: on a retake the newest attempt becomes the current one.
 3. **The report is computed when it is read.** The attempt is scored with the weights of its own
    quiz version, then the current report definition — an ordered list of small section objects in
    code — is run over it.
@@ -121,8 +125,8 @@ Details: [docs/architecture.md](docs/architecture.md).
   scored with its own quiz version, so comparisons work across versions.
 - **A new kind of content:** add a block type; an older web build skips blocks it does not know.
 
-The last two section mechanisms are not used by the four sections in the design, so they are
-proven by tests with test-only sections. The full table of changes and their effect on existing
+The two mechanisms for new sections — a specific answer and earlier attempts — are not used by the
+four sections in the design, so they are proven by tests with test-only sections. The full table of changes and their effect on existing
 users is in [docs/architecture.md](docs/architecture.md#handling-future-changes).
 
 ## Trade-offs
@@ -137,7 +141,9 @@ users is in [docs/architecture.md](docs/architecture.md#handling-future-changes)
 - **Registration with an existing email signs the user in** when the password matches. A deliberate
   shortcut: a real product should confirm the email by a link instead, which needs email delivery.
 - **In-memory rate limiting** by client and email. Enough for one API instance; several would need
-  a shared store.
+  a shared store. Without a load balancer in front, all visitors count as one client.
+- **One set of answer options per quiz version.** Mixed scales or reverse-scored questions would
+  need a second document format.
 
 Each of these is explained in [docs/architecture.md](docs/architecture.md#trade-offs).
 
@@ -145,20 +151,23 @@ Each of these is explained in [docs/architecture.md](docs/architecture.md#trade-
 
 - **Deployment.** Optional in the brief. The Docker setup runs production builds locally.
 - **Email confirmation and password recovery.** Excluded by the brief.
-- **Automated frontend tests.** The time went into API tests (66 unit, 136 end-to-end), where the
-  logic lives. The web app was verified by hand in the browser against every spec scenario, on
-  mobile and desktop widths and with the keyboard only. Component tests for the quiz flow and the
-  forms, and one browser test of the whole funnel, would be the next step.
 - **A screen listing earlier attempts.** All attempts are kept and available to report sections,
   but the design has no such screen.
 - **An admin interface** for quiz versions and report content.
 - **Account deletion and data export**, and removal of old answers on request.
 - **Cleanup of unclaimed anonymous attempts.** They expire for claiming after 24 hours but the rows
-  stay; a scheduled job would delete them.
+  stay; a scheduled job would delete them. Submitting the quiz is also not rate-limited.
 - **Session revocation**, and a shared store for rate-limit counters (see trade-offs).
 - **Dark theme and translations.** The design has neither.
 - **A notice when a just-finished result could not be saved** for a user who already has a report
   and signs in with an expired claim token. They see their previous report.
+
+## Tests
+
+- **API:** 73 unit tests (scoring, report engine, validation, guards) and 146 end-to-end tests that
+  run the real application against PostgreSQL, including the database constraints and triggers.
+- **Web:** 79 component and unit tests (quiz flow, forms, report blocks, storage, proxy) and a
+  browser test of the whole funnel at desktop and mobile sizes.
 
 ## More
 

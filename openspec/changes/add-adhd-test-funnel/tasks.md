@@ -67,9 +67,14 @@
 
 ## 9. Integration check
 
-- [ ] 9.1 Run the full flow against docker-compose: quiz, account creation, report, sign out, sign in, retake with a different outcome; verify each step matches the specs
-- [ ] 9.2 Run the `code-reviewer` subagent over the whole codebase and the `qa-tester` subagent over every spec scenario; verify there are no blocking findings and no failing scenarios
-- [ ] 9.3 Run `openspec validate add-adhd-test-funnel --strict` together with `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`; verify all pass
+- [x] 9.1 Run the full flow against docker-compose: quiz, account creation, report, sign out, sign in, retake with a different outcome; verify each step matches the specs
+- [x] 9.2 Run the `code-reviewer` subagent over the whole codebase and the `qa-tester` subagent over every spec scenario; verify there are no blocking findings and no failing scenarios
+- [x] 9.3 Run `openspec validate add-adhd-test-funnel --strict` together with `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`; verify all pass
+
+- [x] 9.4 Give the quiz document a format number (`schemaVersion`), checked by the database and by the application on read; verify that existing versions are stamped as format 1 and that a missing or unknown format is rejected
+- [x] 9.5 Make the quiz version, gender and submission time of an attempt immutable in the database; verify that direct updates are rejected and claiming still works
+- [x] 9.6 Add web tests: Vitest and Testing Library for the quiz flow, forms, report blocks, storage and proxy, and a Playwright test of the whole funnel run in CI against the container setup; verify they pass locally and in CI
+- [x] 9.7 Cover the default "forwarding headers are not trusted" setting with an e2e test, and bring `design.md`, `CLAUDE.md` and the environment comments in line with the code; verify the test fails when the API trusts the header
 
 ## Workflow follow-up
 

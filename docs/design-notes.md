@@ -17,6 +17,9 @@ Deliberate differences from the design:
   the keyboard would cover it.
 - The progress bar fills with the question number; the design shows the same fill everywhere.
 - The quiz arrows are darker and sit higher than in the design, to be easier to see and reach.
+- The forward arrow is never truly disabled. Until an answer is chosen it looks inactive and is
+  marked `aria-disabled`, but it can still be focused and pressed, and answers with "Choose an
+  answer to continue". A disabled button cannot be reached from the keyboard or explain itself.
 - The gauge needle follows the score linearly; in the design it does not match the number.
 - Links the flows need but the design lacks: "Sign in" / "My report" in the header, "Retake test"
   on the report, and links between the two account pages.

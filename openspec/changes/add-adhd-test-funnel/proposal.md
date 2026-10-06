@@ -14,7 +14,7 @@ The repository is empty and the test task asks for a complete ADHD test funnel: 
 - Add a section mechanism in which a section declares the question keys it needs and is omitted when an attempt's quiz version does not contain them.
 - Add project tooling: pnpm workspace, ESLint and Prettier with import sorting, git hooks with commitlint, CI, docker-compose, Swagger UI and a README covering architecture, trade-offs, future changes and omissions.
 
-Out of scope: email confirmation, password recovery, a UI for browsing earlier attempts, an admin UI for quiz or report content, deployment, frontend automated tests.
+Out of scope: email confirmation, password recovery, a UI for browsing earlier attempts, an admin UI for quiz or report content, deployment.
 
 ## Capabilities
 

@@ -31,7 +31,7 @@ Decisions already made with the product owner and treated as constraints here:
 - Runtime editing of quiz or report content (no admin UI, no rule language stored in data).
 - Refresh tokens, session revocation, email flows, OAuth.
 - A UI for browsing or comparing earlier attempts.
-- Frontend automated tests, deployment, internationalization.
+- Deployment, internationalization.
 
 ## Decisions
 
@@ -61,10 +61,11 @@ users             id uuid PK, email citext UNIQUE, password_hash text, created_a
 ```
 
 - `quiz_versions.definition` is one immutable JSON document: ordered questions (`key`, `text`), ordered options (`key`, `label`, `score`) and `scoring.highThreshold`. A version is read and written as a whole and never edited, so a document fits better than normalized question and option tables, and it is impossible to edit one question of a published version by accident. Versions are published by migrations, which makes each publication reviewable and reproducible. Because the API applies pending migrations on start, a fresh installation has quiz version 1 as soon as it is up, with no separate seeding command; running migrations again is a no-op. The partial unique index enforces "exactly one active version" in the database.
-- The document's shape is enforced by the database: a CHECK constraint calls `quiz_definition_is_valid`, which requires questions and options with unique non-empty keys, numeric non-negative scores with at least one above zero, and a threshold from 0 to 100. A JSON column gives up per-field constraints; this gives them back for the fields that scoring depends on.
+- The document carries `schemaVersion`, the number of its format, separate from the quiz version number, which names its content. Published documents are never rewritten, so a later format (per-question options, question weights, several thresholds) has to coexist with format 1; the number tells every reader which one it holds. The database rejects a format it has not been taught, the application refuses to read one it does not support, and `QuizDefinition` is a union that will make the compiler point at every reader when a second format is added. Format 1 has one option list for all questions, so a version cannot mix answer scales or score a question in reverse; that is the first thing a format 2 would lift.
+- The document's shape is enforced by the database: a CHECK constraint calls `quiz_definition_is_valid`, which requires a known `schemaVersion`, questions and options with unique non-empty keys, numeric non-negative scores with at least one above zero, and a threshold from 0 to 100. A JSON column gives up per-field constraints; this gives them back for the fields that scoring depends on.
 - `attempt_answers` is a table rather than a JSON column because answers are the long-lived asset: future report sections and analytics query them by `question_key`. It stores keys, not scores or texts, so it stays valid whatever happens to later versions.
 - A user owns any number of attempts. The current attempt is the one with the latest `created_at` (the submission time), found through the `(user_id, created_at DESC)` index. A retake only inserts or attaches a row and never deletes one, so answers given under earlier quiz versions survive and remain available to future report sections. Ordering by submission time rather than claim time means that claiming an old anonymous attempt late cannot push a newer result out of the report.
-- Answers reference questions and options by key, not by a foreign key, because those live inside the JSON document. A trigger on insert closes that gap: it rejects an answer whose question or option key is not in the quiz version of its attempt. Keys are strings on purpose: a key names the meaning of a question and stays the same across versions, which is what lets a report section ask for an answer without knowing the version.
+- Answers reference questions and options by key, not by a foreign key, because those live inside the JSON document. A trigger on insert closes that gap: it rejects an answer whose question or option key is not in the quiz version of its attempt. A second trigger keeps that check meaningful afterwards: the quiz version, gender and submission time of an attempt cannot be changed, so stored answers cannot be re-pointed at a version with other weights. Only ownership changes, when an attempt is claimed. Deleting stays possible, for the cascade from `attempts` and for removing a user's data on request. Keys are strings on purpose: a key names the meaning of a question and stays the same across versions, which is what lets a report section ask for an answer without knowing the version.
 - No score, level or report is stored. Both are pure functions of the attempt and its quiz version.
 
 Alternative considered: storing `score` and `level` on the attempt. Rejected because the owner chose read-time computation; the README records that a stored snapshot would be the first thing to add if scores must never change retroactively.
@@ -88,7 +89,7 @@ interface ReportSection {
 //                                                          // gender, score, level and answers
 ```
 
-The engine computes the score and level, then for each section skips it when a required question key is missing from the attempt's quiz version, calls `build`, and drops `null` results. `ReportBlock` is a discriminated union defined in `packages/contracts`: `text`, `checklist`, `text-with-bullets` and `faq`. The API returns `{ score, level, gender, sections: ReportBlock[] }`.
+The engine computes the score and level, then for each section skips it when a required question key is missing from the attempt's quiz version, calls `build`, and drops `null` results. `ReportBlock` is a discriminated union defined in `packages/contracts`: `text`, `checklist`, `text-with-bullets` and `faq`. The API returns `{ score, level, levelLabel, gender, submittedAt, sections: ReportBlock[] }`.
 
 - A new section for old attempts is one new object in the array.
 - A section that depends on answers reads `ctx.answers` and declares `requires`; attempts from versions without that question simply do not get it.
@@ -111,7 +112,7 @@ All routes are under `/api`.
 | GET | `/auth/me` | required | Current user |
 | GET | `/report` | required | Report for the current user's attempt |
 
-`/report` takes no identifier, so there is no way to ask for another user's report. Input is validated with class-validator DTOs and a global `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`). Errors use Nest's standard JSON shape with a stable `code` field for the cases the UI branches on (`QUIZ_VERSION_OUTDATED`, `INVALID_CREDENTIALS`, `CLAIM_TOKEN_INVALID`, `REPORT_NOT_FOUND`). Swagger UI is served at `/api/docs` outside production by default; `API_DOCS_ENABLED` overrides this either way, and the local container setup turns it on.
+`/report` takes no identifier, so there is no way to ask for another user's report. Input is validated with class-validator DTOs and a global `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`). Errors use Nest's standard JSON shape with a stable `code` field for the cases the UI branches on (`QUIZ_VERSION_OUTDATED`, `ATTEMPT_INVALID`, `CLAIM_TOKEN_INVALID`, `INVALID_CREDENTIALS`, `EMAIL_ALREADY_REGISTERED`, `REPORT_NOT_FOUND`). Swagger UI is served at `/api/docs` outside production by default; `API_DOCS_ENABLED` overrides this either way, and the local container setup turns it on.
 
 ### Claim token
 
@@ -130,12 +131,12 @@ The browser talks only to the Next.js origin; `src/proxy.ts` (Next.js 16's succe
 | Route | Rendering | Notes |
 | --- | --- | --- |
 | `/` | server | Start screen with Male and Female; fetches the quiz |
-| `/quiz` | client | One question at a time; state mirrored to `sessionStorage` |
-| `/signup` | client | Account creation; sends the pending claim token when there is one |
-| `/signin` | client | Sign-in; sends a pending claim token if one exists |
+| `/quiz` | server page, client quiz | The page fetches the quiz and the session; the quiz itself is a client component with state mirrored to `sessionStorage` |
+| `/signup` | server page, client form | Redirects a signed-in user; account creation sends the pending claim token when there is one |
+| `/signin` | server page, client form | Redirects a signed-in user; sign-in sends a pending claim token if one exists |
 | `/report` | server | Fetches `/report` with the cookie; redirects on 401 or 404 |
 
-Quiz progress (`gender`, `answers`, `index`, `quizVersionId`) and the pending claim token are two small external stores over `sessionStorage`, read with `useSyncExternalStore`; an in-memory copy keeps the quiz working when storage is unavailable. Selecting an option only marks it; the forward arrow, disabled until the question is answered, moves on and submits on the last question, and the back arrow on the first question returns to the start screen. The header shows "Sign in", "My report" or "Sign out" depending on `GET /auth/me`. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules on top of a small design system taken from Figma rather than estimated:
+Quiz progress (`gender`, `answers`, `index`, `quizVersionId`) and the pending claim token are two small external stores over `sessionStorage`, read with `useSyncExternalStore`; an in-memory copy keeps the quiz working when storage is unavailable. Selecting an option only marks it; the forward arrow, marked inactive until the question is answered, moves on and submits on the last question, and the back arrow on the first question returns to the start screen. The header shows "Sign in", "My report" or "Sign out" depending on `GET /auth/me`. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules on top of a small design system taken from Figma rather than estimated:
 
 - Tokens are CSS custom properties in one global stylesheet, named after the Figma styles: text `#04182C`, `#1C2D3F`, `#485664`; accent blue `#1066B9`, `#E5F2FF`, `#F3F7FA`; background `#F7F8FA`; white; the teal action color and the gauge colors read from the start and report frames.
 - Typography uses the two families in the file, Geologica for headings and Inter for body, loaded with `next/font`. Each Figma text style has a desktop and a mobile value (for example Heading 3 is 32/36 on desktop and 20/1.2 on mobile); they become one `clamp()` token per style that runs linearly between the 390 and 1440 widths.
@@ -149,9 +150,10 @@ Quiz progress (`gender`, `answers`, `index`, `quizVersionId`) and the pending cl
 - One root ESLint flat config: `typescript-eslint` type-checked rules, `eslint-plugin-simple-import-sort`, `eslint-config-next` scoped to `apps/web`, `eslint-config-prettier`. Prettier formats everything.
 - husky + lint-staged (ESLint and Prettier on staged files) and commitlint with the conventional config.
 - Jest for API unit tests and e2e tests; e2e tests start PostgreSQL with Testcontainers, run migrations and drive the real Nest application through supertest.
+- Vitest with Testing Library for web component and unit tests, kept next to the code they test; Playwright for one browser test of the whole funnel, run against an already running system (development servers or the container setup) at desktop and mobile sizes.
 - TypeORM runs with `synchronize: false`; schema and quiz versions change only through migrations, which the API applies on start.
 - `docker-compose.yml` starts PostgreSQL, the API and the web app; `docker-compose.dev.yml` starts only PostgreSQL for local development.
-- GitHub Actions runs lint, typecheck, tests and build on pushes to `main` and on pull requests, and starts the container setup on an empty database.
+- GitHub Actions runs lint, typecheck, tests and build on pushes to `main` and on pull requests, starts the container setup on an empty database and runs the browser test against it.
 
 ### AI-assisted workflow
 
@@ -162,11 +164,11 @@ The project is built with Claude Code and keeps its working agreement in the rep
 - `.claude/agents/qa-tester.md` is a read-only subagent that runs the checks and exercises the running API and database against the spec scenarios.
 - Frontend work loads the `modern-web-guidance` skill first, so markup, CSS and client-side code follow current platform practice (native form validation hooks, `details`-based disclosure for the FAQ, logical properties, container-friendly layout, accessible focus states).
 
-The README describes this workflow in a short section.
+`docs/working-method.md` describes this workflow.
 
 ## Risks / Trade-offs
 
-- [Registering with an existing email signs the user in, so the registration form confirms that an email is registered and doubles as a login form] → Requested as a time-saving shortcut. The README documents it as temporary and describes the proper flow: always answer "check your inbox", verify email ownership, and attach the attempt only after an explicit sign-in.
+- [Registering with an existing email signs the user in, so the registration form confirms that an email is registered and doubles as a login form] → Requested as a time-saving shortcut. `docs/architecture.md` documents it as temporary and describes the proper flow: always answer "check your inbox", verify email ownership, and attach the attempt only after an explicit sign-in.
 - [Attempts are never deleted, so a user's rows grow with every retake and there is no way for a user to remove old answers] → Rows are small and retakes are rare. Deleting an account and its attempts is listed in the README as not done.
 - [Earlier attempts are loaded for every report although no shipped section uses them yet] → One indexed query bounded by a small limit; it keeps the section contract honest instead of promising a capability that was never exercised.
 - [Read-time computation means a report can change for a user who has already seen it when the logic changes] → Accepted by the owner. Scores stay stable because weights are frozen in the quiz version; only wording and sections move.
@@ -175,5 +177,5 @@ The README describes this workflow in a short section.
 - [An account can exist without an attempt, a state the design has no screen for] → Such a user is always sent to the quiz start instead of the report, and the first attempt submitted while signed in is attached directly.
 - [A stateless JWT cannot be revoked before it expires] → Acceptable for a report-only product; sign-out clears the cookie.
 - [Publishing quiz versions through migrations requires a deploy] → Acceptable without an admin UI; it also gives review and history for free.
-- [Figma has no answer text for the collapsed FAQ items] → Short answers are written in the tone of the design, without medical claims, and the README marks them as authored placeholder content.
+- [Figma has no answer text for the collapsed FAQ items] → Short answers are written in the tone of the design, without medical claims, and `docs/design-notes.md` marks them as authored content.
 - [Figma asset URLs returned by the MCP server expire after 7 days] → Assets are downloaded into the repository in the same task that first uses them; no code references a Figma URL.

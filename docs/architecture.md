@@ -15,6 +15,14 @@ The document's shape is checked by the database as well (a `CHECK` constraint): 
 options need unique keys, scores must be numbers that are not negative, and the threshold must lie
 between 0 and 100.
 
+The document also carries `schemaVersion`, the number of its format. The quiz version number says
+which content a document holds; `schemaVersion` says which structure it has. Published versions
+are never rewritten, so a future structure — per-question options, question weights, more than one
+threshold — will have to live next to the current one, and every reader needs to know which one it
+is looking at without guessing from the fields. The database rejects a format it has not been
+taught, the API refuses to read one it does not support, and in code `QuizDefinition` is a union,
+so adding format 2 makes the compiler point at every place that must handle it.
+
 Changing the quiz means publishing a new version. Earlier attempts keep pointing at the version
 they were answered under, so they are always interpreted with the right questions and weights.
 
@@ -23,9 +31,17 @@ they were answered under, so they are always interpreted with the right question
 An attempt records the quiz version, the gender and one `(question key, option key)` row per
 answer. Question and option keys are strings rather than numeric ids on purpose: a key names the meaning of
 a question and stays the same across quiz versions, which lets a report section ask for an answer
-without knowing the version. A trigger rejects an answer whose keys are not in the quiz version of
-its attempt, which gives the integrity a foreign key would. No score, level or report is stored. Stored answers cannot be edited (another trigger),
-and attempts are never deleted: when a user takes the quiz again, the most recently submitted
+without knowing the version. No score, level or report is stored.
+
+Because questions live inside a JSON document, answers cannot have a foreign key to them. Three
+triggers give the same protection: an answer is rejected unless its keys exist in the quiz version
+of its attempt; a stored answer cannot be edited; and the quiz version, gender and submission time
+of an attempt cannot change, so stored answers cannot be re-pointed at a version with other
+weights. Only the owner of an attempt changes, when it is claimed. Deleting stays possible on
+purpose: the cascade from an attempt to its answers needs it, and so would removing a user's data
+on request.
+
+Attempts are never deleted by the application: when a user takes the quiz again, the most recently submitted
 attempt simply becomes the current one, and the earlier ones stay available as history.
 
 ### 3. The report is computed when it is read
@@ -113,8 +129,13 @@ sections that ship are the ones in the design, which depend on level and gender 
   rule language has to be stored in data. An admin UI would move this the other way.
 - **A quiz version as one JSON document.** It is read and written as a whole and never edited, so
   a document fits better than normalised tables. Its shape is still enforced by the database. With
-  an admin UI or a shared question bank, questions would move to their own table. All questions of a version share one set of
-  answer options; per-question options would need a new document shape.
+  an admin UI or a shared question bank, questions would move to their own table.
+- **One set of answer options per quiz version.** Every question of a version is answered on the
+  same scale, and a score belongs to an option, not to a question–option pair. So a version cannot
+  mix scales ("Yes / No" next to "Agree / Disagree") or contain a reverse-scored question, where
+  agreeing means fewer traits. The design needs neither. Lifting the limit means a second document
+  format (`schemaVersion: 2`) with options or scores per question, and a branch for it in scoring,
+  validation and the database checks; versions already published stay in format 1 and keep working.
 - **Answers as rows, not JSON.** Slightly more writes, but future sections and analytics can query
   answers by question key.
 - **Stateless session token.** No session table and no refresh tokens, as the brief asks. The cost
@@ -131,8 +152,13 @@ sections that ship are the ones in the design, which depend on level and gender 
   does not pass on forwarding headers sent by the browser, so a client cannot choose the address it
   is counted under. Without a load balancer in front, the API therefore sees the web server as the
   only client: guessing one account's password is still limited, but someone can exhaust another
-  person's allowance for a minute. Behind a load balancer, set `TRUST_FORWARDED_HEADERS=true` on
+  person's allowance for a minute, and the cap of 100 is shared by all visitors of the site. Behind a load balancer, set `TRUST_FORWARDED_HEADERS=true` on
   the web app and `TRUST_PROXY` on the API. Counters live in the API process, so several API
   instances would need a shared store.
+- **Submitting the quiz is public and not rate-limited.** A visitor must be able to finish the quiz
+  without an account, so `POST /api/attempts` accepts anonymous requests, and each one stores a
+  small row. Limiting it by client address has the same problem as above — without a load balancer
+  every visitor is one client. In production this belongs at the edge (a per-address limit on the
+  load balancer), together with the cleanup job for unclaimed attempts.
 - **CSS Modules with tokens instead of a UI kit.** More CSS to write, no dependency, and full
   control over markup and accessibility.

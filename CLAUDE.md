@@ -33,20 +33,25 @@ pnpm dev                   # API on :3001 and web on :3000 (dev:api / dev:web fo
 pnpm lint                  # ESLint for the whole workspace (lint:fix to autofix)
 pnpm format                # Prettier (format:check in CI)
 pnpm typecheck
-pnpm test                  # API unit tests
+pnpm test                  # unit tests: API (Jest) and web components (Vitest)
 pnpm test:e2e              # API end-to-end tests; starts PostgreSQL with Testcontainers
+pnpm test:browser          # Playwright test of the funnel; needs the system running on :3000
 pnpm build
 
 docker compose up --build  # the whole system, production builds, on http://localhost:3000
 ```
 
-Single tests (from `apps/api`; the scripts already pass the Node flag Jest needs):
+Single tests in the API (from `apps/api`; the scripts already pass the Node flag Jest needs):
 
 ```bash
 pnpm test scoring                    # unit tests in files matching a name
 pnpm test -t "is high at exactly"    # by test name
 pnpm test:e2e auth                   # one e2e file
 ```
+
+In the web app (from `apps/web`): `pnpm test quiz-flow` runs the Vitest files matching a name;
+`pnpm test:browser --project=desktop` runs the browser test at one size (`E2E_BASE_URL` points it
+at another address; use `localhost`, not `127.0.0.1`, against the development server).
 
 The Docker setup runs production builds with two switches set for plain HTTP on localhost:
 `COOKIE_SECURE=false` and `API_DOCS_ENABLED=true`. Their defaults follow `NODE_ENV`.
@@ -59,15 +64,18 @@ build first and use the compiled data source. The API also applies pending migra
 The design rests on a few invariants. Changes that break them break the point of the project.
 
 - **Quiz versions are immutable.** A version is one row in `quiz_versions` with the whole quiz as
-  JSON (questions with stable keys, options with scores, the level threshold). A trigger rejects
+  JSON (`schemaVersion`, questions with stable keys, options with scores, the level threshold). A trigger rejects
   edits, a partial unique index allows one active version, and a CHECK constraint
-  (`quiz_definition_is_valid`) rejects a malformed document. To change the quiz, add a migration
+  (`quiz_definition_is_valid`) rejects a malformed document or an unknown `schemaVersion`. A new
+  document structure is a new `schemaVersion`: a member of the `QuizDefinition` union and a branch
+  in the CHECK function, never a rewrite of published versions. To change the quiz, add a migration
   that inserts a new version and moves the active flag; never edit a published version or its
   migration. Migrations are listed explicitly in `apps/api/src/database/migrations/index.ts` and
   use raw SQL only.
 - **Attempts store raw answers, nothing derived.** `attempts` plus one `attempt_answers` row per
   question (keys only). Score, level and report are never stored. Answers cannot be updated and must use
-  keys that exist in the attempt's quiz version (triggers). Attempts are never deleted on a retake: the current attempt is the most recently
+  keys that exist in the attempt's quiz version, and an attempt's quiz version, gender and
+  `created_at` cannot change (triggers). Attempts are never deleted on a retake: the current attempt is the most recently
   submitted one.
 - **The report is computed on read.** `apps/api/src/report`: `scoreAttempt` scores an attempt with
   its **own** quiz version; `buildReport` (a pure function) turns a user's attempts into a report
@@ -87,7 +95,7 @@ The design rests on a few invariants. Changes that break them break the point of
   public ones. Never accept a user or attempt id from the client to select data.
 - **One origin.** Browsers call `/api/*` on the web app; `apps/web/src/proxy.ts` forwards to
   `API_URL` at run time and drops client-sent forwarding headers. Server components call the API
-  through `apps/web/src/lib/api/server.ts`, which forwards the visitor's cookie.
+  through `apps/web/src/lib/api/server-api.ts`, which forwards the visitor's cookie.
 - The API accepts JSON bodies only (it answers 415 otherwise); this is what prevents cross-site
   form posts from signing a visitor in.
 
@@ -102,7 +110,7 @@ with `ApiException`.
   signatures in the API must be imported with `import type` (`isolatedModules` with decorator
   metadata).
 - **Web components:** one folder per component (`name/name.tsx`, `name/name.module.css`,
-  `name/index.ts`), tests alongside when they exist. Non-component modules (schemas, storage) stay
+  `name/index.ts`), with its test next to it (`name/name.test.tsx`). Non-component modules (schemas, storage) stay
   as files at the feature root.
 - **CSS:** design tokens are custom properties in `apps/web/src/app/globals.css`, named after the
   Figma styles. Every length is in `rem` (hairlines use `--border-width`); sizes that differ between
@@ -119,7 +127,12 @@ with `ApiException`.
 - **API tests:** e2e tests boot the real application against a Testcontainers database shared by
   all files; call `resetDatabase(app)` after each test and use the helpers in
   `apps/api/test/helpers.ts`. Settings read at startup (rate limit, `NODE_ENV`) are tested in
-  separate files that set the environment before loading the app.
+  separate files that set the environment before loading the app. Tests do not read `.env`.
+- **Web tests:** Vitest with Testing Library (`apps/web/src/**/*.test.ts(x)`). `src/test/setup.ts`
+  replaces `next/navigation` with the recording `router` from `src/test/router.ts` and resets the
+  session stores; mock a service with `vi.mock('@/lib/api/...')`, not `fetch`. Find elements by
+  role and accessible name. The Playwright test in `apps/web/e2e` drives a running system and
+  creates a new account on every run.
 
 ## Working agreement
 
