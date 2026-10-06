@@ -23,6 +23,11 @@ export class QuizService {
     return version;
   }
 
+  /** Any published version, active or not; null when the id is unknown. */
+  findVersion(id: string): Promise<QuizVersion | null> {
+    return this.quizVersions.findOneBy({ id });
+  }
+
   async getActiveQuiz(): Promise<Quiz> {
     return toPublicQuiz(await this.getActiveVersion());
   }

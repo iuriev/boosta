@@ -23,10 +23,10 @@
 
 ## 4. Attempts
 
-- [ ] 4.1 Add the `attempts` and `attempt_answers` entities and migration with the constraints and the `(user_id, created_at DESC)` index from the design; verify the migration applies and reverts
-- [ ] 4.2 Implement attempt validation against a quiz version (complete, no duplicates, known keys, active version, valid gender); verify with unit tests for each rejection case in the spec
-- [ ] 4.3 Implement `POST /api/attempts` for anonymous visitors with claim token generation, hashed storage and 24-hour expiry; verify with e2e tests that a valid submission returns a token and an invalid one stores nothing
-- [ ] 4.4 Implement the claim service (lookup by hash, expiry, single use, attach without deleting earlier attempts) and the current-attempt query (most recently submitted); verify with e2e tests for reuse, expiry, a retake that keeps the earlier attempt, and a late claim of an older attempt
+- [x] 4.1 Add the `attempts` and `attempt_answers` entities and migration with the constraints and the `(user_id, created_at DESC)` index from the design; verify the migration applies and reverts
+- [x] 4.2 Implement attempt validation against a quiz version (complete, no duplicates, known keys, active version, valid gender); verify with unit tests for each rejection case in the spec
+- [x] 4.3 Implement `POST /api/attempts` for anonymous visitors with claim token generation, hashed storage and 24-hour expiry; verify with e2e tests that a valid submission returns a token and an invalid one stores nothing
+- [x] 4.4 Implement the claim service (lookup by hash, expiry, single use, attach without deleting earlier attempts) and the current-attempt query (most recently submitted); verify with e2e tests for reuse, expiry, a retake that keeps the earlier attempt, and a late claim of an older attempt
 
 ## 5. Authentication
 

@@ -2,6 +2,7 @@ import type { MigrationInterface } from 'typeorm';
 
 import { CreateQuizVersions1791270000000 } from './1791270000000-create-quiz-versions';
 import { PublishQuizVersion11791270100000 } from './1791270100000-publish-quiz-version-1';
+import { CreateAttempts1791280000000 } from './1791280000000-create-attempts';
 
 /**
  * Every migration, oldest first. Listed explicitly instead of through a glob
@@ -10,4 +11,5 @@ import { PublishQuizVersion11791270100000 } from './1791270100000-publish-quiz-v
 export const migrations: (new () => MigrationInterface)[] = [
   CreateQuizVersions1791270000000,
   PublishQuizVersion11791270100000,
+  CreateAttempts1791280000000,
 ];

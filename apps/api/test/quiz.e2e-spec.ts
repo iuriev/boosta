@@ -4,6 +4,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
 
+import { resetDatabase } from './helpers';
 import { createTestApp } from './test-app';
 
 const SAMPLE_DEFINITION = JSON.stringify({
@@ -30,12 +31,7 @@ describe('Quiz (e2e)', () => {
   });
 
   afterEach(async () => {
-    // Leave the database as the migrations created it: version 1 only, active.
-    // The two steps are independent so a failing cleanup of extra versions
-    // cannot leave the default quiz inactive for the rest of the run.
-    await dataSource.query(`DELETE FROM quiz_versions WHERE version <> 1`).catch(() => undefined);
-    await dataSource.query(`UPDATE quiz_versions SET is_active = false WHERE version <> 1`);
-    await dataSource.query(`UPDATE quiz_versions SET is_active = true WHERE version = 1`);
+    await resetDatabase(app);
   });
 
   afterAll(async () => {
