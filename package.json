@@ -15,6 +15,7 @@
     "prepare": "husky || true",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @boosta/api test:e2e",
+    "test:browser": "pnpm --filter @boosta/web test:browser",
     "dev": "pnpm --parallel --filter @boosta/api --filter @boosta/web dev",
     "dev:api": "pnpm --filter @boosta/api dev",
     "dev:web": "pnpm --filter @boosta/web dev",

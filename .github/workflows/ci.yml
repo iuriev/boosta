@@ -50,7 +50,8 @@ jobs:
         run: pnpm build
 
   docker:
-    name: Docker images
+    name: Docker images and browser test
+    needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -67,6 +68,30 @@ jobs:
           curl --fail --silent --show-error --retry 10 --retry-connrefused http://127.0.0.1:3000/ > /dev/null
           curl --fail --silent --show-error http://127.0.0.1:3000/api/quiz | grep -q '"questions"'
 
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install the browser
+        run: pnpm --filter @boosta/web exec playwright install --with-deps chromium
+
+      # The whole funnel in a real browser, against the production images.
+      - name: Browser test
+        run: pnpm test:browser
+
       - name: Show logs on failure
         if: failure()
         run: docker compose logs
+
+      - name: Keep the browser traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web/test-results
+          retention-days: 7

@@ -1,9 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Logo } from '@/components/logo';
 import { ROUTES } from '@/config/routes';
 
 import styles from './status-page.module.css';
+
+export const metadata: Metadata = { title: 'Page not found' };
 
 export default function NotFoundPage() {
   return (

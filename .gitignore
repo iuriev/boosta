@@ -11,3 +11,7 @@ coverage/
 docs/test-task-brief.pdf
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+test-results/
+playwright-report/
