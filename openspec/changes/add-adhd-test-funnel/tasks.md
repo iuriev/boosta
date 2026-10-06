@@ -16,10 +16,10 @@
 
 ## 3. Quiz versions
 
-- [ ] 3.1 Define the quiz and attempt types in `packages/contracts`; verify both apps typecheck against them
-- [ ] 3.2 Add the `quiz_versions` entity and migration with the partial unique index on the active flag; verify with a test that a second active version is rejected by the database
-- [ ] 3.3 Add the migration that publishes quiz version 1 as the default seed (the five questions from the design with stable keys, five options scored 4 to 0, threshold 60); verify with an e2e test that an empty database serves the five questions after startup and that starting again does not duplicate the version
-- [ ] 3.4 Implement `GET /api/quiz` returning the active version without scores or threshold; verify with e2e tests for the response shape and the absence of scoring data
+- [x] 3.1 Define the quiz and attempt types in `packages/contracts`; verify both apps typecheck against them
+- [x] 3.2 Add the `quiz_versions` entity and migration with the partial unique index on the active flag; verify with a test that a second active version is rejected by the database
+- [x] 3.3 Add the migration that publishes quiz version 1 as the default seed (the five questions from the design with stable keys, five options scored 4 to 0, threshold 60); verify with an e2e test that an empty database serves the five questions after startup and that starting again does not duplicate the version
+- [x] 3.4 Implement `GET /api/quiz` returning the active version without scores or threshold; verify with e2e tests for the response shape and the absence of scoring data
 
 ## 4. Attempts
 
