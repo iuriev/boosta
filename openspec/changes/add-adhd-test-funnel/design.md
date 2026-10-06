@@ -2,7 +2,7 @@
 
 ## Context
 
-The repository is empty. The brief fixes Next.js, NestJS and PostgreSQL, requires the client and server to be separate applications, and asks for minimal authentication. The Figma file is view-only and serves as a structural reference: a gender selection screen, five Likert questions, an account creation form, a sign-in form and four report variants (Low or High traits, Male or Female) that share one structure. See `proposal.md` for motivation and `specs/` for the behavior contract.
+The repository is empty. The brief fixes Next.js, NestJS and PostgreSQL, requires the client and server to be separate applications, and asks for minimal authentication. The original Figma file is view-only; an editable copy (file key `yaAMVo6Ifoq1cC7VNN3eZc`) is readable through the Figma MCP server and is the source for design tokens, exact copy and assets. It contains desktop (1440 wide) and mobile (390 wide) frames for a gender selection screen, five Likert questions, an account creation form, a sign-in form and four report variants (Low or High traits, Male or Female) that share one structure. See `proposal.md` for motivation and `specs/` for the behavior contract.
 
 Decisions already made with the product owner and treated as constraints here:
 
@@ -133,7 +133,13 @@ The browser talks only to the Next.js origin; `next.config` rewrites `/api/:path
 | `/signin` | client | Sign-in; sends a pending claim token if one exists |
 | `/report` | server | Fetches `/report` with the cookie; redirects on 401 or 404 |
 
-Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `claimToken`) persisted to `sessionStorage`. Selecting an option only marks it; the forward arrow, disabled until the question is answered, moves on and submits on the last question, and the back arrow on the first question returns to the start screen. The header shows "Sign in" or "My report" depending on `GET /auth/me`. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules with design tokens as CSS custom properties, approximating the Figma layout.
+Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `claimToken`) persisted to `sessionStorage`. Selecting an option only marks it; the forward arrow, disabled until the question is answered, moves on and submits on the last question, and the back arrow on the first question returns to the start screen. The header shows "Sign in" or "My report" depending on `GET /auth/me`. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules on top of a small design system taken from Figma rather than estimated:
+
+- Tokens are CSS custom properties in one global stylesheet, named after the Figma styles: text `#04182C`, `#1C2D3F`, `#485664`; accent blue `#1066B9`, `#E5F2FF`, `#F3F7FA`; background `#F7F8FA`; white; the teal action color and the gauge colors read from the start and report frames.
+- Typography uses the two families in the file, Geologica for headings and Inter for body, loaded with `next/font`. Each Figma text style has a desktop and a mobile value (for example Heading 3 is 32/36 on desktop and 20/1.2 on mobile); they become one token per style that switches at the breakpoint.
+- Layout is mobile-first with a single breakpoint between the 390 and 1440 frames; content width, paddings, gaps and radii come from the frames' auto-layout values.
+- Logo, illustration and icons are downloaded from Figma as SVG or PNG into `apps/web/public` and used unmodified. The score gauge is the one drawn element, because its needle depends on the score.
+- Design-only layers that have no behavior in the brief (the hidden timer in the quiz header) are not implemented.
 
 ### Tooling
 
@@ -168,4 +174,4 @@ The README describes this workflow in a short section.
 - [A stateless JWT cannot be revoked before it expires] → Acceptable for a report-only product; sign-out clears the cookie.
 - [Publishing quiz versions through migrations requires a deploy] → Acceptable without an admin UI; it also gives review and history for free.
 - [Figma has no answer text for the collapsed FAQ items] → Short answers are written in the tone of the design, without medical claims, and the README marks them as authored placeholder content.
-- [The Figma file is view-only, so copy is transcribed by hand] → Section texts are taken from the Figma layer tree and checked against the rendered frames when the content module is written.
+- [Figma asset URLs returned by the MCP server expire after 7 days] → Assets are downloaded into the repository in the same task that first uses them; no code references a Figma URL.

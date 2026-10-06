@@ -42,17 +42,18 @@
 - [ ] 6.1 Define the report response and block union in `packages/contracts`; verify both apps typecheck against them
 - [ ] 6.2 Implement score and level calculation from an attempt and its quiz version; verify with unit tests for the scenarios in the report spec (0, 100, 70, the threshold boundary)
 - [ ] 6.3 Implement the report engine (ordered sections, `requires` check, `null` skipping, `previousAttempts` in the context); verify with unit tests using test-only sections that a section with a present key is built from the answer, a section with an absent key is omitted, and a history-based section is built for a user with two attempts and omitted for a user with one
-- [ ] 6.4 Transcribe the report copy from Figma into content modules and implement the four sections for both levels and genders; verify with unit tests that each of the four level and gender combinations yields the expected section order and distinct content
+- [ ] 6.4 Read the report copy from the Figma copy through the Figma MCP server into content modules and implement the four sections for both levels and genders; verify with unit tests that each of the four level and gender combinations yields the expected section order and distinct content
 - [ ] 6.5 Implement `GET /api/report` for the current user; verify with e2e tests for the authenticated report, the report following the latest attempt after a retake, the unauthenticated rejection, the no-attempt case and isolation between two users
 
 ## 7. Web application
 
 - [ ] 7.0 Load the `modern-web-guidance` skill and note in the group's commit body which of its recommendations shaped the markup, CSS and client code; verify the skill was consulted before the first component is written
-- [ ] 7.1 Scaffold the Next.js app with the `/api` rewrite, a typed API client for browser and server use, global styles and design tokens; verify the app builds and the rewrite reaches the API
-- [ ] 7.2 Build the shared UI (header with logo, button, text field, progress bar, option list, footer) with CSS Modules; verify they render on the pages that use them
+- [ ] 7.1 Scaffold the Next.js app with the `/api` rewrite and a typed API client for browser and server use; verify the app builds and the rewrite reaches the API
+- [ ] 7.1a Build the design system from the Figma copy through the Figma MCP server (`get_design_context` and `get_variable_defs` on every desktop and mobile frame): color, typography, spacing and radius tokens as CSS custom properties, Geologica and Inter through `next/font`, and the logo, illustration and icons downloaded into `apps/web/public`; verify every token value is traceable to a Figma style and no file references a Figma URL
+- [ ] 7.2 Build the shared UI (header with logo, button, text field, progress bar, option list, footer) with CSS Modules using only design-system tokens; verify each component against the Figma screenshot of its frame at 390 and 1440 widths
 - [ ] 7.3 Implement the start screen with gender selection and the quiz flow with back and forward arrows, the "current/total" counter, `sessionStorage` persistence and submission from the last question; verify manually that the forward arrow is disabled until an answer is chosen, reload restores progress and finishing the quiz leads to account creation
 - [ ] 7.4 Implement the account creation and sign-in pages with react-hook-form and zod, server error display, pending claim token handling, the "Already have an account? Sign in" and "Create account" links and redirects (report when the account has an attempt, quiz start when it does not); verify manually registration, existing-email sign-in, wrong password, and registration without a finished quiz followed by taking the quiz
-- [ ] 7.5 Implement the report page as a server component with the score gauge, block renderers, FAQ accordion, sign-out, "Retake test" and redirects for 401 and 404; verify manually all four report variants and both redirects
+- [ ] 7.5 Implement the report page as a server component with the score gauge, block renderers, FAQ accordion, sign-out, "Retake test" and redirects for 401 and 404; verify manually all four report variants at 390 and 1440 widths against the Figma frames, and both redirects
 - [ ] 7.6 Add the header link that shows "Sign in" or "My report" by session state, and handle the signed-in retake and the outdated-quiz-version response; verify manually that a signed-in retake updates the report and an outdated version restarts the quiz
 
 ## 8. Delivery
