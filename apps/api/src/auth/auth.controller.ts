@@ -34,7 +34,9 @@ export class AuthController {
     this.cookieOptions = {
       httpOnly: true,
       sameSite: 'lax',
-      secure: config.get('NODE_ENV', { infer: true }) === NodeEnv.Production,
+      secure:
+        config.get('COOKIE_SECURE', { infer: true }) ??
+        config.get('NODE_ENV', { infer: true }) === NodeEnv.Production,
       path: '/',
     };
   }

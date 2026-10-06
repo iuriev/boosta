@@ -109,7 +109,7 @@ All routes are under `/api`.
 | GET | `/auth/me` | required | Current user |
 | GET | `/report` | required | Report for the current user's attempt |
 
-`/report` takes no identifier, so there is no way to ask for another user's report. Input is validated with class-validator DTOs and a global `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`). Errors use Nest's standard JSON shape with a stable `code` field for the cases the UI branches on (`QUIZ_VERSION_OUTDATED`, `INVALID_CREDENTIALS`, `CLAIM_TOKEN_INVALID`, `REPORT_NOT_FOUND`). Swagger UI is served at `/api/docs` outside production.
+`/report` takes no identifier, so there is no way to ask for another user's report. Input is validated with class-validator DTOs and a global `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`). Errors use Nest's standard JSON shape with a stable `code` field for the cases the UI branches on (`QUIZ_VERSION_OUTDATED`, `INVALID_CREDENTIALS`, `CLAIM_TOKEN_INVALID`, `REPORT_NOT_FOUND`). Swagger UI is served at `/api/docs` outside production by default; `API_DOCS_ENABLED` overrides this either way, and the local container setup turns it on.
 
 ### Claim token
 
@@ -117,7 +117,7 @@ All routes are under `/api`.
 
 ### Authentication
 
-`@nestjs/jwt` signs a JWT (`sub` = user id, 7-day expiry) that is set as an `httpOnly`, `SameSite=Lax` cookie, `Secure` in production. One global guard reads the cookie; routes opt out with a `@Public()` decorator and `POST /attempts` uses an optional variant. Passwords are hashed with bcrypt at cost 12; the 72-character maximum in the spec is bcrypt's input limit. `helmet` and `@nestjs/throttler` (on the two credential routes) are enabled. Alternative considered: Passport strategies — more boilerplate for two endpoints. Alternative considered: server-side sessions — revocable, but more infrastructure than the brief wants.
+`@nestjs/jwt` signs a JWT (`sub` = user id, 7-day expiry) that is set as an `httpOnly`, `SameSite=Lax` cookie, `Secure` in production by default; `COOKIE_SECURE=false` turns it off for a production build served over plain HTTP, which is what the local container setup does. One global guard reads the cookie; routes opt out with a `@Public()` decorator and `POST /attempts` uses an optional variant. Passwords are hashed with bcrypt at cost 12; the 72-character maximum in the spec is bcrypt's input limit. `helmet` and `@nestjs/throttler` (on the two credential routes) are enabled. Alternative considered: Passport strategies — more boilerplate for two endpoints. Alternative considered: server-side sessions — revocable, but more infrastructure than the brief wants.
 
 ### Same-origin cookies through a Next.js proxy
 
@@ -149,7 +149,7 @@ Quiz progress (`gender`, `answers`, `index`, `quizVersionId`) and the pending cl
 - Jest for API unit tests and e2e tests; e2e tests start PostgreSQL with Testcontainers, run migrations and drive the real Nest application through supertest.
 - TypeORM runs with `synchronize: false`; schema and quiz versions change only through migrations, which the API applies on start.
 - `docker-compose.yml` starts PostgreSQL, the API and the web app; `docker-compose.dev.yml` starts only PostgreSQL for local development.
-- GitHub Actions runs lint, typecheck, tests and build on every push and pull request.
+- GitHub Actions runs lint, typecheck, tests and build on pushes to `main` and on pull requests, and starts the container setup on an empty database.
 
 ### AI-assisted workflow
 

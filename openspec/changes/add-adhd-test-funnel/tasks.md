@@ -58,10 +58,10 @@
 
 ## 8. Delivery
 
-- [ ] 8.1 Add Dockerfiles for both apps and `docker-compose.yml` that starts PostgreSQL, the API and the web app; verify that `docker compose up --build` on empty volumes serves the start screen and the five seeded questions with no extra command
+- [x] 8.1 Add Dockerfiles for both apps and `docker-compose.yml` that starts PostgreSQL, the API and the web app; verify that `docker compose up --build` on empty volumes serves the start screen and the five seeded questions with no extra command
 - [ ] 8.2 Add the GitHub Actions workflow for lint, typecheck, unit tests, e2e tests and build; verify the workflow passes on the pushed branch
-- [ ] 8.3 Write the README (how to run and test, key architectural decisions, trade-offs including the registration shortcut and its proper design, how quiz and report changes are handled, what was not done and why, and the AI-assisted workflow with OpenSpec, the project subagents and the skills used); verify every documented command runs as written
-- [ ] 8.4 Write `CLAUDE.md` with the commands and architecture overview for future sessions; verify the documented commands match the root scripts
+- [x] 8.3 Write the README (how to run and test, key architectural decisions, trade-offs including the registration shortcut and its proper design, how quiz and report changes are handled, what was not done and why, and the AI-assisted workflow with OpenSpec, the project subagents and the skills used); verify every documented command runs as written
+- [x] 8.4 Write `CLAUDE.md` with the commands and architecture overview for future sessions; verify the documented commands match the root scripts
 
 ## 9. Integration check
 

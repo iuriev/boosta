@@ -39,7 +39,10 @@ export function setupApp(app: NestExpressApplication): void {
   );
   app.enableShutdownHooks();
 
-  if (config.get('NODE_ENV', { infer: true }) !== NodeEnv.Production) {
+  const docsEnabled =
+    config.get('API_DOCS_ENABLED', { infer: true }) ??
+    config.get('NODE_ENV', { infer: true }) !== NodeEnv.Production;
+  if (docsEnabled) {
     const document = SwaggerModule.createDocument(
       app,
       new DocumentBuilder()

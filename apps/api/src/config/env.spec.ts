@@ -35,6 +35,15 @@ describe('validateEnv', () => {
     expect(validateEnv(withExample).JWT_SECRET).toBe(EXAMPLE_JWT_SECRET);
   });
 
+  it('reads boolean switches and rejects anything that is not true or false', () => {
+    const env = validateEnv({ ...valid, COOKIE_SECURE: 'false', API_DOCS_ENABLED: 'true' });
+
+    expect(env.COOKIE_SECURE).toBe(false);
+    expect(env.API_DOCS_ENABLED).toBe(true);
+    expect(validateEnv(valid).COOKIE_SECURE).toBeUndefined();
+    expect(() => validateEnv({ ...valid, COOKIE_SECURE: 'yes' })).toThrow(/COOKIE_SECURE/);
+  });
+
   it('rejects an unknown NODE_ENV', () => {
     expect(() => validateEnv({ ...valid, NODE_ENV: 'staging' })).toThrow(/NODE_ENV/);
   });

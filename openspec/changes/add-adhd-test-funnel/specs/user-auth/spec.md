@@ -70,7 +70,11 @@ The system SHALL start a session for a request with an email and password that m
 - **THEN** the system rejects it with a generic invalid-credentials error
 
 ### Requirement: Session cookie
-The system SHALL carry the session in a cookie that is not readable by scripts, is sent only on same-site requests, is marked secure in production and expires after 7 days. Passwords SHALL be stored only as salted hashes.
+The system SHALL carry the session in a cookie that is not readable by scripts, is sent only on same-site requests and expires after 7 days. In production it SHALL be marked secure unless the deployment explicitly turns that off to serve plain HTTP, as the local container setup does. Passwords SHALL be stored only as salted hashes.
+
+#### Scenario: Production over plain HTTP
+- **WHEN** the system runs in production mode with the secure flag explicitly turned off
+- **THEN** the session cookie is set without the secure attribute and keeps the http-only and same-site attributes
 
 #### Scenario: Session established
 - **WHEN** a user registers or signs in successfully

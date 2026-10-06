@@ -1,5 +1,6 @@
-import { plainToInstance, Type } from 'class-transformer';
+import { plainToInstance, Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsOptional,
@@ -13,6 +14,10 @@ import {
 
 /** The placeholder shipped in .env.example. Public, so never acceptable in production. */
 export const EXAMPLE_JWT_SECRET = 'change-me-to-a-long-random-string-0123456789';
+
+/** Reads "true" / "false" from the environment; anything else is left for validation to reject. */
+const toBoolean = ({ value }: { value: unknown }): unknown =>
+  value === 'true' ? true : value === 'false' ? false : value;
 
 export enum NodeEnv {
   Development = 'development',
@@ -42,6 +47,22 @@ export class Env {
   @IsString()
   @MinLength(32, { message: 'JWT_SECRET must be at least 32 characters long' })
   JWT_SECRET!: string;
+
+  /**
+   * Whether the session cookie is marked Secure. Defaults to true in
+   * production. Set to false only to run a production build over plain HTTP,
+   * as the local docker-compose setup does.
+   */
+  @Transform(toBoolean)
+  @IsOptional()
+  @IsBoolean()
+  COOKIE_SECURE?: boolean;
+
+  /** Whether Swagger UI is served at /api/docs. Defaults to true outside production. */
+  @Transform(toBoolean)
+  @IsOptional()
+  @IsBoolean()
+  API_DOCS_ENABLED?: boolean;
 
   /** bcrypt cost factor. Lowered only in tests, where hashing speed does not matter. */
   @Type(() => Number)

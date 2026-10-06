@@ -1,0 +1,17 @@
+# Keep the build context small and free of local state.
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.husky
+.claude
+.tmp-figma
+docs
+openspec
+*.md
