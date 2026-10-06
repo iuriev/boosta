@@ -30,6 +30,8 @@ export function SignOutButton() {
     clearQuizProgress();
     clearClaimToken();
     router.replace(ROUTES.signIn);
+    // Drops the pages the router has cached for the signed-in user, so going
+    // back does not show them.
     router.refresh();
   };
 

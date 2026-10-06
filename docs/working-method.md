@@ -1,8 +1,10 @@
 # Working method
 
 The project was specified before it was built, with
-[OpenSpec](https://github.com/Fission-AI/OpenSpec), in `openspec/changes/add-adhd-test-funnel/`:
-a proposal, behavior specs with scenarios, a design document and a task list. Implementation
+[OpenSpec](https://github.com/Fission-AI/OpenSpec), as one change:
+a proposal, behavior specs with scenarios, a design document and a task list. The change is now
+archived in `openspec/changes/archive/2026-10-06-add-adhd-test-funnel/` and its specs live in
+`openspec/specs/`. Implementation
 followed the task list one group at a time with Claude Code:
 
 1. Implement a task group.

@@ -177,4 +177,5 @@ Each of these is explained in [docs/architecture.md](docs/architecture.md#trade-
   implementation differs
 - [docs/working-method.md](docs/working-method.md) — OpenSpec, the reviewer and tester subagents,
   and the skills used
-- `openspec/changes/add-adhd-test-funnel/` — proposal, behavior specs, design and tasks
+- `openspec/specs/` — behavior specs with scenarios; `openspec/changes/archive/2026-10-06-add-adhd-test-funnel/` — the proposal,
+  design and task list they were built from

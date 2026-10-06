@@ -81,6 +81,8 @@ export function AuthForm({ mode }: AuthFormProps) {
       } else {
         router.replace(resultWasLost ? startWithNotice('result-expired') : ROUTES.start);
       }
+      // Drops the pages the router has cached from before signing in, so
+      // going back does not show them as a signed-out visitor saw them.
       router.refresh();
     } catch (error) {
       if (!(error instanceof ApiError)) {

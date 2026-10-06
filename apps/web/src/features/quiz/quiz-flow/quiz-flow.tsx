@@ -123,6 +123,9 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
       if (claimToken === null) {
         // Signed in: the attempt already belongs to the account.
         router.replace(ROUTES.report);
+        // Costs a second request for the report, on purpose: it drops the
+        // pages the router has cached from before the attempt existed, so
+        // going back does not show the start page without "My report".
         router.refresh();
       } else {
         saveClaimToken(claimToken);
@@ -134,6 +137,7 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
         setLeaving(true);
         clearQuizProgress();
         router.replace(startWithNotice('quiz-updated'));
+        // Drops the pages the router has cached with the replaced quiz.
         router.refresh();
         return;
       }

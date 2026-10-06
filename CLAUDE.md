@@ -17,8 +17,11 @@ workspace with two separate applications and one shared package:
 
 `README.md` explains how to run the project and summarises the architecture; `docs/` has the
 details (architecture and trade-offs, API, design notes, working method). Behavior is
-specified in `openspec/changes/add-adhd-test-funnel/` (specs with scenarios, `design.md`,
-`tasks.md`); read the relevant spec before changing behavior and keep it in step with the code.
+specified in `openspec/specs/` (requirements with scenarios); read the relevant spec before changing
+behavior. The change that built the project is archived in
+`openspec/changes/archive/2026-10-06-add-adhd-test-funnel/` (`proposal.md`, `design.md`, `tasks.md`). New
+behavior starts as a new OpenSpec change under `openspec/changes/`, which is merged into the specs
+when it is archived.
 
 ## Commands
 
@@ -136,7 +139,7 @@ with `ApiException`.
 
 ## Working agreement
 
-Work follows `tasks.md` one group at a time. After implementing a group, run the `code-reviewer`
+Work follows the `tasks.md` of the active OpenSpec change one group at a time. After implementing a group, run the `code-reviewer`
 subagent on the diff and then the `qa-tester` subagent against the spec scenarios (both in
 `.claude/agents/`), fix what they find, and make one commit for the group. Load the
 `modern-web-guidance` skill before any HTML, CSS or client-side work in `apps/web`.

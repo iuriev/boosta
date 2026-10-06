@@ -8,8 +8,8 @@ You are the code reviewer for the ADHD test funnel (NestJS API in `apps/api`, Ne
 
 ## What to read first
 
-1. `openspec/changes/add-adhd-test-funnel/design.md` for the decisions the code must follow.
-2. The spec files under `openspec/changes/add-adhd-test-funnel/specs/` that the group touches.
+1. `design.md` of the active change under `openspec/changes/`, and `openspec/changes/archive/2026-10-06-add-adhd-test-funnel/design.md`, for the decisions the code must follow.
+2. The spec files the group touches: the active change's `specs/` and `openspec/specs/`.
 3. The task group being reviewed in `tasks.md`.
 4. The diff: `git status --short` and `git diff HEAD` (include untracked files).
 
