@@ -23,10 +23,10 @@
 
 ## 4. Attempts
 
-- [ ] 4.1 Add the `attempts` and `attempt_answers` entities and migration with the unique constraints from the design; verify the migration applies and reverts
+- [ ] 4.1 Add the `attempts` and `attempt_answers` entities and migration with the constraints and the `(user_id, created_at DESC)` index from the design; verify the migration applies and reverts
 - [ ] 4.2 Implement attempt validation against a quiz version (complete, no duplicates, known keys, active version, valid gender); verify with unit tests for each rejection case in the spec
 - [ ] 4.3 Implement `POST /api/attempts` for anonymous visitors with claim token generation, hashed storage and 24-hour expiry; verify with e2e tests that a valid submission returns a token and an invalid one stores nothing
-- [ ] 4.4 Implement the claim service (lookup by hash, expiry, single use, atomic replacement of the user's previous attempt); verify with e2e tests for reuse, expiry and replacement
+- [ ] 4.4 Implement the claim service (lookup by hash, expiry, single use, attach without deleting earlier attempts) and the current-attempt query (most recently submitted); verify with e2e tests for reuse, expiry, a retake that keeps the earlier attempt, and a late claim of an older attempt
 
 ## 5. Authentication
 
@@ -34,16 +34,16 @@
 - [ ] 5.2 Implement the JWT cookie session, the global auth guard, `@Public()` and the optional-auth variant; verify with e2e tests that a protected route rejects a missing or tampered cookie
 - [ ] 5.3 Implement `POST /api/auth/register` including the existing-email-with-correct-password path; verify with e2e tests for success, missing claim token, short password, existing email with correct password and with wrong password
 - [ ] 5.4 Implement `POST /api/auth/login` (with optional claim), `POST /api/auth/logout` and `GET /api/auth/me`; verify with e2e tests for correct and wrong credentials, claim on sign-in and sign-out
-- [ ] 5.5 Make `POST /api/attempts` attach directly to a signed-in user and replace the previous attempt; verify with an e2e test for a signed-in retake
+- [ ] 5.5 Make `POST /api/attempts` attach directly to a signed-in user; verify with an e2e test that after a signed-in retake the new attempt is current and the earlier one is still stored
 - [ ] 5.6 Add throttling to the register and login routes; verify with an e2e test that requests above the limit are rejected
 
 ## 6. Report
 
 - [ ] 6.1 Define the report response and block union in `packages/contracts`; verify both apps typecheck against them
 - [ ] 6.2 Implement score and level calculation from an attempt and its quiz version; verify with unit tests for the scenarios in the report spec (0, 100, 70, the threshold boundary)
-- [ ] 6.3 Implement the report engine (ordered sections, `requires` check, `null` skipping); verify with unit tests using test-only sections that a section with a present key is built from the answer and a section with an absent key is omitted
+- [ ] 6.3 Implement the report engine (ordered sections, `requires` check, `null` skipping, `previousAttempts` in the context); verify with unit tests using test-only sections that a section with a present key is built from the answer, a section with an absent key is omitted, and a history-based section is built for a user with two attempts and omitted for a user with one
 - [ ] 6.4 Transcribe the report copy from Figma into content modules and implement the four sections for both levels and genders; verify with unit tests that each of the four level and gender combinations yields the expected section order and distinct content
-- [ ] 6.5 Implement `GET /api/report` for the current user; verify with e2e tests for the authenticated report, the unauthenticated rejection, the no-attempt case and isolation between two users
+- [ ] 6.5 Implement `GET /api/report` for the current user; verify with e2e tests for the authenticated report, the report following the latest attempt after a retake, the unauthenticated rejection, the no-attempt case and isolation between two users
 
 ## 7. Web application
 

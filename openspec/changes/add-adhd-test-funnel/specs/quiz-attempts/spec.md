@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Covers how a finished quiz is submitted, validated and stored, how an anonymous attempt becomes owned by an account, and what happens when a user takes the quiz again.
+Covers how a finished quiz is submitted, validated and stored, how an anonymous attempt becomes owned by an account, and how retakes update the current result while earlier attempts are preserved.
 
 ## ADDED Requirements
 
@@ -47,7 +47,7 @@ A claim token SHALL be unguessable, SHALL be usable once, and SHALL expire 24 ho
 - **THEN** the system rejects it
 
 ### Requirement: Claiming an attempt
-The system SHALL attach an unowned attempt to an account when a valid claim token is presented during registration or sign-in. After claiming, the attempt SHALL be the account's current attempt.
+The system SHALL attach an unowned attempt to an account when a valid claim token is presented during registration or sign-in. After claiming, the attempt SHALL belong to that account.
 
 #### Scenario: Claim during registration
 - **WHEN** a visitor registers with a valid claim token
@@ -55,15 +55,30 @@ The system SHALL attach an unowned attempt to an account when a valid claim toke
 
 #### Scenario: Claim during sign-in
 - **WHEN** an existing user signs in with a valid claim token
-- **THEN** the attempt becomes the user's current attempt
+- **THEN** the attempt belongs to the user and, being the most recently submitted, is the user's current attempt
 
-### Requirement: A retake replaces the current attempt
-A user SHALL have at most one attempt. When a user who already has an attempt claims or submits a new one, the system SHALL replace the previous attempt with the new one atomically, so that the user never ends up with no attempt or with two.
+### Requirement: The current attempt is the most recently submitted one
+A user MAY own any number of attempts. The system SHALL treat the user's most recently submitted attempt as the current attempt, which is the one the report is built from.
 
 #### Scenario: Signed-in user retakes the quiz
 - **WHEN** a signed-in user submits a new complete attempt
-- **THEN** the new attempt is attached to the user directly, the previous attempt is removed and no claim token is returned
+- **THEN** the new attempt is attached to the user directly, becomes the current attempt and no claim token is returned
 
 #### Scenario: Returning user retakes while signed out
 - **WHEN** a user with an existing attempt takes the quiz while signed out and then signs in with the claim token
-- **THEN** the new attempt replaces the previous one
+- **THEN** the new attempt becomes the user's current attempt
+
+#### Scenario: An older attempt is claimed late
+- **WHEN** a user claims an attempt that was submitted before an attempt they already own
+- **THEN** the claimed attempt is kept and the more recently submitted attempt remains current
+
+### Requirement: Earlier attempts are preserved
+The system SHALL keep every attempt a user owns, with its quiz version, gender and answers, when the user takes the quiz again. A retake SHALL NOT delete or modify earlier attempts.
+
+#### Scenario: Retake keeps the previous answers
+- **WHEN** a user who owns an attempt submits or claims a new one
+- **THEN** the earlier attempt and its answers remain stored and associated with the user
+
+#### Scenario: Retake on a newer quiz version
+- **WHEN** a user who took quiz version 1 retakes the quiz on version 2, which no longer contains one of the questions
+- **THEN** the user's answer to that question from version 1 is still stored

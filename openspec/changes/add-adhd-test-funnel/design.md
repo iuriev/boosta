@@ -10,7 +10,7 @@ Decisions already made with the product owner and treated as constraints here:
 - The report is computed at read time; nothing derived is stored.
 - The answer-dependent section mechanism is built and tested, but no section beyond the Figma design is added.
 - An attempt is stored anonymously as soon as the quiz is finished.
-- A retake overwrites the previous attempt; no history is kept.
+- Every attempt is kept; the most recently submitted attempt of a user is the current one and drives the report. There is no UI for earlier attempts.
 - Registering with an existing email and a correct password signs the user in (a deliberate shortcut, see Risks).
 
 ## Goals / Non-Goals
@@ -26,7 +26,7 @@ Decisions already made with the product owner and treated as constraints here:
 
 - Runtime editing of quiz or report content (no admin UI, no rule language stored in data).
 - Refresh tokens, session revocation, email flows, OAuth.
-- Attempt history and comparison between attempts.
+- A UI for browsing or comparing earlier attempts.
 - Frontend automated tests, deployment, internationalization.
 
 ## Decisions
@@ -48,8 +48,9 @@ quiz_versions     id uuid PK, version int UNIQUE, is_active bool,
                   definition jsonb, created_at
                   partial UNIQUE index on (is_active) WHERE is_active
 attempts          id uuid PK, quiz_version_id FK, gender enum(male,female),
-                  user_id FK NULL UNIQUE, claim_token_hash text NULL UNIQUE,
+                  user_id FK NULL, claim_token_hash text NULL UNIQUE,
                   claim_expires_at timestamptz NULL, created_at
+                  index on (user_id, created_at DESC)
 attempt_answers   attempt_id FK ON DELETE CASCADE, question_key text,
                   option_key text, PK (attempt_id, question_key)
 users             id uuid PK, email citext UNIQUE, password_hash text, created_at
@@ -57,7 +58,7 @@ users             id uuid PK, email citext UNIQUE, password_hash text, created_a
 
 - `quiz_versions.definition` is one immutable JSON document: ordered questions (`key`, `text`), ordered options (`key`, `label`, `score`) and `scoring.highThreshold`. A version is read and written as a whole and never edited, so a document fits better than normalized question and option tables, and it is impossible to edit one question of a published version by accident. Versions are published by migrations, which makes each publication reviewable and reproducible. The partial unique index enforces "exactly one active version" in the database.
 - `attempt_answers` is a table rather than a JSON column because answers are the long-lived asset: future report sections and analytics query them by `question_key`. It stores keys, not scores or texts, so it stays valid whatever happens to later versions.
-- `attempts.user_id UNIQUE` enforces "at most one attempt per user"; a retake deletes the old row and attaches the new one in a single transaction.
+- A user owns any number of attempts. The current attempt is the one with the latest `created_at` (the submission time), found through the `(user_id, created_at DESC)` index. A retake only inserts or attaches a row and never deletes one, so answers given under earlier quiz versions survive and remain available to future report sections. Ordering by submission time rather than claim time means that claiming an old anonymous attempt late cannot push a newer result out of the report.
 - No score, level or report is stored. Both are pure functions of the attempt and its quiz version.
 
 Alternative considered: storing `score` and `level` on the attempt. Rejected because the owner chose read-time computation; the README records that a stored snapshot would be the first thing to add if scores must never change retroactively.
@@ -76,13 +77,16 @@ interface ReportSection {
   requires?: string[];                       // question keys
   build(ctx: ReportContext): ReportBlock | null;
 }
-// ReportContext: { gender, score, level, answers: Map<questionKey, { optionKey, score }> }
+// ReportContext: { gender, score, level, answers: Map<questionKey, { optionKey, score }>,
+//                  previousAttempts: PreviousAttempt[] }   // newest first, each with its own
+//                                                          // gender, score, level and answers
 ```
 
 The engine computes the score and level, then for each section skips it when a required question key is missing from the attempt's quiz version, calls `build`, and drops `null` results. `ReportBlock` is a discriminated union defined in `packages/contracts`: `text`, `checklist`, `text-with-bullets` and `faq`. The API returns `{ score, level, gender, sections: ReportBlock[] }`.
 
 - A new section for old attempts is one new object in the array.
 - A section that depends on answers reads `ctx.answers` and declares `requires`; attempts from versions without that question simply do not get it.
+- A section that depends on a user's history reads `ctx.previousAttempts` and returns `null` when it is empty. Earlier attempts are scored with their own quiz version, so they are comparable even across versions. No such section ships now; the context field and a test-only section prove the path.
 - The web application switches on `block.type`, so new sections of an existing type need no frontend change.
 
 Section texts are TypeScript modules keyed by level and gender next to the sections that use them. Alternative considered: content and display rules in the database — it allows edits without a deploy but needs a rule language and an editor, neither of which exists here.
@@ -105,7 +109,7 @@ All routes are under `/api`.
 
 ### Claim token
 
-`POST /attempts` generates 32 random bytes, returns them base64url-encoded and stores only their SHA-256 hash with a 24-hour expiry. Claiming looks the attempt up by hash, checks expiry and ownership, sets `user_id` and nulls the hash in one transaction, which makes the token single-use. A fast hash is appropriate because the token is high-entropy, unlike a password.
+`POST /attempts` generates 32 random bytes, returns them base64url-encoded and stores only their SHA-256 hash with a 24-hour expiry. Claiming looks the attempt up by hash, checks expiry and that it is still unowned, sets `user_id` and nulls the hash in one transaction, which makes the token single-use. A fast hash is appropriate because the token is high-entropy, unlike a password.
 
 ### Authentication
 
@@ -140,7 +144,8 @@ Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `
 ## Risks / Trade-offs
 
 - [Registering with an existing email signs the user in, so the registration form confirms that an email is registered and doubles as a login form] → Requested as a time-saving shortcut. The README documents it as temporary and describes the proper flow: always answer "check your inbox", verify email ownership, and attach the attempt only after an explicit sign-in.
-- [A retake deletes the previous attempt, which contradicts the brief's hint that future sections may use answers from previous attempts] → The schema keeps attempts and users separate, so keeping history means dropping the unique constraint on `attempts.user_id` and selecting the latest attempt. Documented in the README as a known gap.
+- [Attempts are never deleted, so a user's rows grow with every retake and there is no way for a user to remove old answers] → Rows are small and retakes are rare. Deleting an account and its attempts is listed in the README as not done.
+- [Earlier attempts are loaded for every report although no shipped section uses them yet] → One indexed query bounded by a small limit; it keeps the section contract honest instead of promising a capability that was never exercised.
 - [Read-time computation means a report can change for a user who has already seen it when the logic changes] → Accepted by the owner. Scores stay stable because weights are frozen in the quiz version; only wording and sections move.
 - [The threshold rule differs from the designer's sticky note] → Chosen by the owner so that score and level can never contradict each other. The threshold is data in the quiz version, so it can be tuned by publishing a version.
 - [Unclaimed anonymous attempts accumulate] → Tokens expire after 24 hours and rows are tiny; a periodic cleanup job is listed in the README as not done.

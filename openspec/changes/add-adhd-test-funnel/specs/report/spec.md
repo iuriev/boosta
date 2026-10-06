@@ -33,11 +33,15 @@ The system SHALL assign the level "High ADHD Traits" when the score is greater t
 - **THEN** the level is Low ADHD Traits
 
 ### Requirement: Report is built from the user's current attempt
-The system SHALL return to an authenticated user the report for their current attempt, containing the score, the level, the gender and an ordered list of sections. The report SHALL be computed at read time from the stored answers by the current report logic.
+The system SHALL return to an authenticated user the report for their current attempt (the most recently submitted one), containing the score, the level, the gender and an ordered list of sections. The report SHALL be computed at read time from the stored answers by the current report logic.
 
 #### Scenario: User opens the report
 - **WHEN** an authenticated user with an attempt requests their report
 - **THEN** the system returns the score, level, gender and sections for that attempt
+
+#### Scenario: User has retaken the quiz
+- **WHEN** an authenticated user who owns several attempts requests their report
+- **THEN** the score, level, gender and sections are those of the most recently submitted attempt
 
 #### Scenario: Report logic changes after the attempt
 - **WHEN** the report logic is updated after a user's attempt was stored
@@ -67,6 +71,17 @@ A report section SHALL be able to declare the question keys it needs and to deri
 
 #### Scenario: Required question is absent
 - **WHEN** a section that needs a given question key is evaluated for an attempt whose quiz version does not contain that question
+- **THEN** the section is omitted and the other sections are returned normally
+
+### Requirement: Sections can use earlier attempts
+The system SHALL make the user's earlier attempts, each with its quiz version and answers, available to report sections alongside the current attempt, so that a section can derive content from a user's history. A section that needs earlier attempts SHALL be omitted when the user has none.
+
+#### Scenario: Section compares with the previous attempt
+- **WHEN** a section that uses earlier attempts is evaluated for a user who has taken the quiz twice
+- **THEN** the section is built with access to the answers of the earlier attempt
+
+#### Scenario: First-time user
+- **WHEN** a section that needs earlier attempts is evaluated for a user with a single attempt
 - **THEN** the section is omitted and the other sections are returned normally
 
 ### Requirement: New sections apply to existing attempts

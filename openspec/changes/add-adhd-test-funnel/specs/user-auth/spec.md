@@ -33,7 +33,7 @@ When a registration request uses an email that already belongs to an account, th
 
 #### Scenario: Existing email, correct password
 - **WHEN** a visitor finishes the quiz and submits the registration form with an existing account's email and its correct password
-- **THEN** the user is signed in and the new attempt replaces the account's previous attempt
+- **THEN** the user is signed in and the new attempt becomes the account's current attempt
 
 #### Scenario: Existing email, wrong password
 - **WHEN** a visitor submits the registration form with an existing account's email and a wrong password
