@@ -1,0 +1,15 @@
+schema: spec-driven
+
+context: |
+  Test task: an ADHD test funnel (quiz -> account creation -> report -> sign in).
+  The brief evaluates functionality, architecture and implementation quality; pixel-perfect UI is not evaluated.
+  All artifacts, documentation, code comments and commit messages are written in English.
+  Commits follow Conventional Commits (enforced by commitlint).
+  Fixed stack: Next.js (App Router) + CSS Modules, NestJS + TypeORM + class-validator, PostgreSQL,
+  pnpm workspaces, Jest, Testcontainers, ESLint + Prettier with import sorting.
+  The client and the server are separate applications.
+  The brief PDF and Figma screenshots are local-only and must not be committed.
+
+rules:
+  tasks:
+    - Each task group ends in a state that passes lint, typecheck and tests, so it can be committed on its own
