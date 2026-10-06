@@ -80,7 +80,7 @@
   display: block;
   padding-block: clamp(1.125rem, 0.986rem + 0.571vw, 1.5rem);
   padding-inline: clamp(1rem, 0.814rem + 0.762vw, 1.5rem);
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   border-radius: var(--radius-lg);
   background: var(--color-surface-subtle);
   font-size: var(--text-body-large);
@@ -97,22 +97,8 @@
   border-color: var(--color-border);
 }
 
-/*
- * The native radio stays in the accessibility tree and keeps keyboard support,
- * but is never drawn: unlike the global .visually-hidden utility, it must stay
- * hidden while focused, because the label shows the focus ring instead.
- */
-.radio {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* The state lives in the native radio; the label only reflects it. */
+/* The native radio is visually hidden (it keeps keyboard support and its
+   place in the accessibility tree); the label shows its state and focus. */
 .option:has(:checked) {
   border-color: var(--color-accent);
   background: var(--color-surface-selected);
@@ -121,7 +107,7 @@
 
 .option:has(:focus-visible) {
   outline: var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: var(--focus-ring-width);
 }
 
 .message {
@@ -161,7 +147,7 @@
   inline-size: 2.25rem;
   block-size: 2.25rem;
   padding: 0;
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-light-blue-01);
   transition: background-color 120ms ease;
@@ -220,6 +206,6 @@
 
   .option:has(:checked) {
     border-color: Highlight;
-    outline: 2px solid Highlight;
+    outline: var(--focus-ring-width) solid Highlight;
   }
 }

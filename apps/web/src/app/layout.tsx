@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${geologica.variable} ${inter.variable}`}>
       <body>
-        <a className="skip-link visually-hidden" href="#content">
+        <a className="skip-link" href="#content">
           Skip to content
         </a>
         {children}

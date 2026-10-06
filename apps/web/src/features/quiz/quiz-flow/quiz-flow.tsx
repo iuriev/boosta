@@ -215,7 +215,7 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
                 >
                   <input
                     id={`${optionIdPrefix}-${option.key}`}
-                    className={styles.radio}
+                    className="visually-hidden"
                     type="radio"
                     // One group per question, so each question has its own selection.
                     name={question.key}
