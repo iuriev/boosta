@@ -1,0 +1,134 @@
+/* Design: white card, 352px wide on mobile, 638px on desktop, soft layered shadow. */
+.card {
+  container-type: inline-size;
+  display: grid;
+  justify-items: center;
+  inline-size: 100%;
+  max-inline-size: 39.875rem;
+  margin-inline: auto;
+  padding-block: clamp(2rem, 1.814rem + 0.762vw, 2.5rem); /* 32 -> 40 */
+  padding-inline: clamp(1rem, 0.443rem + 2.286vw, 2.5rem); /* 16 -> 40 */
+  border: 1px solid var(--color-light-blue-02);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+/*
+ * The illustration is a fixed composition: a head with four labels placed
+ * around it. It is laid out in the 558 x 284 box of the desktop design and
+ * sized with container units, so it scales as one picture with the card.
+ */
+.illustration {
+  position: relative;
+  inline-size: 100%;
+  max-inline-size: 34.875rem;
+  aspect-ratio: 558 / 284;
+  /* 1 design pixel of the 558px-wide box. */
+  --px: calc(100cqi / 558);
+  font-size: calc(20 * var(--px));
+}
+
+@supports not (inline-size: 1cqi) {
+  .illustration {
+    --px: 0.55px;
+  }
+}
+
+.head {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  /* Design: 273 x 237, cropped from a wider picture. */
+  inline-size: calc(273 * var(--px));
+  block-size: calc(237 * var(--px));
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+.label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: calc(8 * var(--px)) calc(24 * var(--px));
+  border: 1px solid var(--color-light-blue-02);
+  border-radius: calc(10 * var(--px));
+  background: var(--color-label-surface);
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-slate-label);
+  white-space: nowrap;
+}
+
+.accent {
+  color: var(--color-accent);
+}
+
+.labelRow {
+  flex-direction: row;
+  align-items: center;
+  gap: calc(6 * var(--px));
+  padding-inline: calc(12 * var(--px));
+}
+
+.labelRow img {
+  inline-size: 1.2em;
+  block-size: 1.2em;
+}
+
+/* Positions from the desktop frame, as fractions of the 558 x 284 box. */
+.labelProductivity {
+  inset-inline-start: 0;
+  inset-block-start: calc(40 / 284 * 100%);
+}
+
+.labelImpulsivity {
+  inset-inline-end: 0;
+  inset-block-start: calc(6 / 284 * 100%);
+}
+
+.labelFocus {
+  inset-inline-start: calc(24 / 558 * 100%);
+  inset-block-start: calc(164 / 284 * 100%);
+}
+
+.labelDistractions {
+  inset-inline-end: 0;
+  inset-block-start: calc(186 / 284 * 100%);
+  align-items: flex-end;
+}
+
+.text {
+  display: grid;
+  gap: 1.25rem;
+  margin-block-start: clamp(1.5rem, 1.314rem + 0.762vw, 2rem); /* 24 -> 32 */
+  text-align: center;
+}
+
+.title {
+  font-size: var(--text-display);
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+/* "ADHD Trait Profile" sits on its own line in the accent color. */
+.titleAccent {
+  display: block;
+  color: var(--color-accent);
+}
+
+.subtitle {
+  max-inline-size: 30.75rem;
+  margin-inline: auto;
+  font-size: var(--text-body-large);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 15rem));
+  justify-content: center;
+  gap: clamp(0.75rem, 1.093rem - 0.381vw, 1rem); /* 16 -> 12 */
+  inline-size: 100%;
+  margin-block-start: 2.5rem;
+}

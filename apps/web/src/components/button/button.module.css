@@ -1,0 +1,37 @@
+/* Primary button. Design: cyan 500, white label, 52px high on mobile and 56px on desktop. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--control-height);
+  padding-inline: clamp(1rem, 0.629rem + 1.524vw, 2rem); /* 16 -> 32 */
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-action);
+  color: var(--color-on-action);
+  font-size: var(--text-body-large);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  transition: background-color 150ms ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-action-hover);
+}
+
+.button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+@media (forced-colors: active) {
+  .button {
+    border: 1px solid ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

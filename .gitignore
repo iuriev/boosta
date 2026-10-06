@@ -10,3 +10,4 @@ coverage/
 .tmp-figma/
 docs/test-task-brief.pdf
 *.tsbuildinfo
+next-env.d.ts

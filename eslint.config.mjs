@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import nextVitals from 'eslint-config-next/core-web-vitals';
 import prettier from 'eslint-config-prettier';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
@@ -6,7 +7,14 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/.next/**', '**/coverage/**', '**/node_modules/**', '.tmp-figma/**'],
+    ignores: [
+      '**/dist/**',
+      '**/.next/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+      '**/next-env.d.ts',
+      '.tmp-figma/**',
+    ],
   },
   js.configs.recommended,
   {
@@ -31,6 +39,11 @@ export default tseslint.config(
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
+  },
+  // React, hooks, accessibility and Next.js rules, for the web app only.
+  ...nextVitals.map((config) => ({ ...config, files: ['apps/web/**/*.{ts,tsx}'] })),
+  {
+    settings: { next: { rootDir: 'apps/web' } },
   },
   {
     files: ['**/*.{js,mjs,cjs}'],

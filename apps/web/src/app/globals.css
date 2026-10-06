@@ -1,0 +1,199 @@
+/*
+ * Global styles: cascade layers, design tokens and element defaults.
+ * Components are styled with CSS Modules, which sit above these layers.
+ *
+ * Token values come from the Figma file ("Test for dev"). Figma gives one value
+ * for the 390px frames and one for the 1440px frames; sizes that differ are
+ * expressed as clamp() running linearly between those two widths, so the layout
+ * is fluid and needs a single breakpoint only where the structure changes.
+ */
+@layer reset, tokens, base;
+
+@layer reset {
+  /* The one rule on every element. It sits in the lowest layer, so any
+     component or later layer overrides it without extra specificity. */
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  :where(html) {
+    /* Stops mobile browsers from inflating text, without blocking user zoom. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  :where(body, h1, h2, h3, h4, p, ul, ol, dl, dd, figure, fieldset, legend) {
+    margin: 0;
+    padding: 0;
+  }
+
+  :where(fieldset) {
+    border: 0;
+    min-inline-size: 0;
+  }
+
+  :where(ul[class], ol[class]) {
+    list-style: none;
+  }
+
+  :where(img, svg) {
+    display: block;
+    max-inline-size: 100%;
+  }
+
+  :where(button, input) {
+    font: inherit;
+    color: inherit;
+  }
+
+  :where(button) {
+    cursor: pointer;
+  }
+
+  :where(a) {
+    color: inherit;
+  }
+}
+
+@layer tokens {
+  :root {
+    /* Tier 1: palette, named after the Figma styles. */
+    --color-dark-blue-01: #04182c;
+    --color-dark-blue-02: #1c2d3f;
+    --color-dark-blue-03: #485664;
+    --color-blue-01: #1066b9;
+    --color-blue-02: #b4cce3;
+    --color-blue-03: #e5f2ff;
+    --color-blue-04: #f3f7fa;
+    --color-light-blue-01: #e8edf2;
+    --color-light-blue-02: #f1f4f7;
+    --color-light-blue-03: #f7f8fa;
+    --color-white: #fff;
+    --color-cyan-50: #e6f2f2;
+    --color-cyan-500: #116a73;
+    --color-cyan-950: #18334d;
+    --color-slate-label: #3b5779;
+    --color-slate-score: #304f6d;
+    --color-callout-line: #87b3dc;
+    --color-shadow: 131 147 165;
+    --color-label-surface: rgb(241 244 247 / 50%);
+    /* Not in the design, which has no error state. Contrast 5.9:1 on white. */
+    --color-red-600: #c0362c;
+
+    --color-gauge-track: #c4d2e9;
+    --color-gauge-1: #8cc9ad;
+    --color-gauge-2: #a9c98c;
+    --color-gauge-3: #ddcf64;
+    --color-gauge-4: #e6aa42;
+    --color-gauge-5: #e66642;
+
+    /* Tier 2: roles. */
+    --color-text-strong: var(--color-dark-blue-01);
+    --color-text: var(--color-dark-blue-02);
+    --color-text-muted: var(--color-dark-blue-03);
+    --color-accent: var(--color-blue-01);
+    --color-action: var(--color-cyan-500);
+    --color-action-hover: color-mix(in oklab, var(--color-cyan-500), black 12%);
+    --color-on-action: var(--color-white);
+    --color-surface: var(--color-white);
+    --color-surface-page: var(--color-light-blue-03);
+    --color-surface-subtle: var(--color-blue-04);
+    --color-surface-selected: var(--color-blue-03);
+    --color-border: var(--color-blue-02);
+    --color-divider: var(--color-light-blue-01);
+    --color-danger: var(--color-red-600);
+    --color-focus: var(--color-blue-01);
+
+    --font-heading: var(--font-geologica), system-ui, sans-serif;
+    --font-body: var(--font-inter), system-ui, sans-serif;
+
+    /* Font sizes: 390px value -> 1440px value. */
+    --text-display: clamp(1.5rem, 0.943rem + 2.286vw, 3rem); /* 24 -> 48 */
+    --text-title-large: clamp(2rem, 1.629rem + 1.524vw, 3rem); /* 32 -> 48 */
+    --text-heading: clamp(1.25rem, 0.971rem + 1.143vw, 2rem); /* 20 -> 32 */
+    --text-subheading: clamp(1.125rem, 0.986rem + 0.571vw, 1.5rem); /* 18 -> 24 */
+    --text-body-large: clamp(1rem, 0.907rem + 0.381vw, 1.25rem); /* 16 -> 20 */
+    --text-body: 1rem;
+    --text-small: 0.875rem;
+
+    --leading-tight: 1.2;
+    --leading-body: 1.4;
+
+    /* Space. */
+    --page-gutter: clamp(1.1875rem, 4.857vw, 4.375rem); /* 19 -> 70 */
+    --content-width: 67.5rem; /* 1080: report sections */
+    --quiz-width: 53.75rem; /* 860 */
+    --form-width: 27.5rem; /* 440 */
+    --control-height: clamp(3.25rem, 3.157rem + 0.381vw, 3.5rem); /* 52 -> 56 */
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: clamp(0.5rem, 0.407rem + 0.381vw, 0.75rem); /* 8 -> 12 */
+    --radius-xl: clamp(1rem, 0.907rem + 0.381vw, 1.25rem); /* 16 -> 20 */
+
+    --shadow-card:
+      0 10px 22px rgb(var(--color-shadow) / 2%), 0 41px 41px rgb(var(--color-shadow) / 2%),
+      0 91px 55px rgb(var(--color-shadow) / 1%);
+    --shadow-selected: 0 3px 6px rgb(var(--color-shadow) / 10%);
+
+    --focus-ring: 2px solid var(--color-focus);
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    min-block-size: 100dvh;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--color-text);
+    background: var(--color-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(h1, h2, h3) {
+    font-family: var(--font-heading);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+  }
+
+  :where(p, li) {
+    text-wrap: pretty;
+  }
+
+  :where(a, button, input, summary):focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Hides content visually but keeps it for assistive technology. */
+  .visually-hidden:where(:not(:focus-within, :active)) {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
+    z-index: 10;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+}

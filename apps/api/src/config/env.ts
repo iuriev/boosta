@@ -59,7 +59,10 @@ export class Env {
   @IsString()
   TRUST_PROXY?: string;
 
-  /** Registration and sign-in requests allowed per client per minute. */
+  /**
+   * Registration and sign-in requests allowed per minute for one email from one
+   * client. A client as a whole may send ten times as many.
+   */
   @Type(() => Number)
   @IsInt()
   @Min(1)

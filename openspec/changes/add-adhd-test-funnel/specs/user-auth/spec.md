@@ -102,22 +102,34 @@ The system SHALL refuse request bodies that are not JSON, so that a form on anot
 - **THEN** the system rejects it and sets no session cookie
 
 ### Requirement: Throttling of credential endpoints
-The system SHALL limit the combined rate of registration and sign-in requests per client and reject requests above the limit.
+The system SHALL limit the combined rate of registration and sign-in requests for one email from one client, and SHALL also cap the total such requests from one client across all emails. Requests above either limit SHALL be rejected. A client SHALL NOT be able to choose the address it is counted under.
 
-#### Scenario: Too many sign-in attempts
-- **WHEN** a client exceeds the allowed number of sign-in requests within the limit window
+#### Scenario: Too many attempts on one account
+- **WHEN** a client exceeds the allowed number of sign-in or registration requests for one email within the limit window
+- **THEN** further requests for that email are rejected until the window passes
+
+#### Scenario: Many accounts from one client
+- **WHEN** a client spreads its requests over many emails and exceeds the per-client cap
 - **THEN** further requests are rejected until the window passes
 
+#### Scenario: Forged forwarding header
+- **WHEN** a browser sends its own `X-Forwarded-For` header with a request to the web application
+- **THEN** the header is not passed on to the API and does not change how the request is counted
+
 ### Requirement: Entry points to sign-in and the report
-The web application SHALL show a "Sign in" link in the header of the start screen and the quiz for a visitor without a session, and a "My report" link in its place for a signed-in user. The account creation page SHALL link to the sign-in page for visitors who already have an account. The start screen SHALL be shown to signed-in users as well, so that a retake follows the same path as a first attempt.
+The web application SHALL show a "Sign in" link in the header of the start screen and the quiz for a visitor without a session. For a signed-in user it SHALL show "My report" in its place when the user has a report, and "Sign out" when the user has not taken the quiz yet. The account creation page SHALL link to the sign-in page for visitors who already have an account. The start screen SHALL be shown to signed-in users as well, so that a retake follows the same path as a first attempt.
 
 #### Scenario: Visitor without a session opens the start screen
 - **WHEN** a visitor without a session opens the start screen
 - **THEN** the header shows a "Sign in" link
 
 #### Scenario: Signed-in user opens the start screen
-- **WHEN** a signed-in user opens the start screen
+- **WHEN** a signed-in user who has a report opens the start screen
 - **THEN** the start screen is shown with a "My report" link in the header instead of "Sign in"
+
+#### Scenario: Signed-in user without a report opens the start screen
+- **WHEN** a signed-in user who has not taken the quiz opens the start screen
+- **THEN** the header shows "Sign out" and no link to a report
 
 #### Scenario: Visitor with a finished quiz already has an account
 - **WHEN** a visitor on the account creation page follows the link to sign in and signs in

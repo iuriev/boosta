@@ -1,0 +1,23 @@
+.page {
+  min-block-size: 100dvh;
+  background: var(--color-surface-page);
+}
+
+/* Design: the card sits 4px (mobile) to 40px (desktop) below the header. */
+.main {
+  display: grid;
+  gap: 1rem;
+  padding-block: clamp(0.25rem, -0.586rem + 3.429vw, 2.5rem) 2rem;
+  padding-inline: var(--page-gutter);
+}
+
+.notice {
+  inline-size: 100%;
+  max-inline-size: 39.875rem;
+  margin-inline: auto;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-selected);
+  color: var(--color-text);
+}

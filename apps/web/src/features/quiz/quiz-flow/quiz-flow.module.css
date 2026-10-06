@@ -1,0 +1,213 @@
+/* Header, then the question filling the rest of the screen. */
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-block-size: 100dvh;
+  background: var(--color-surface);
+}
+
+/* Design: 4px track in blue 04, fill in blue 01. */
+.progress {
+  display: block;
+  inline-size: 100%;
+  block-size: 0.25rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  appearance: none;
+  accent-color: var(--color-accent);
+}
+
+.progress::-webkit-progress-bar {
+  background: var(--color-surface-subtle);
+}
+
+.progress::-webkit-progress-value {
+  border-radius: 2rem;
+  background: var(--color-accent);
+  transition: inline-size 200ms ease;
+}
+
+.progress::-moz-progress-bar {
+  border-radius: 2rem;
+  background: var(--color-accent);
+}
+
+.main {
+  display: grid;
+  padding-inline: var(--page-gutter);
+}
+
+/* The question fills the page; the navigation stays at the bottom, as in the design. */
+.form {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: var(--quiz-width);
+  margin-inline: auto;
+  /* Design: 12px (mobile) to 20px (desktop) between the header and the question. */
+  padding-block-start: clamp(0.75rem, 0.564rem + 0.762vw, 1.25rem);
+}
+
+.question {
+  display: grid;
+  gap: clamp(0.75rem, 0.286rem + 1.905vw, 2rem); /* 12 -> 32 */
+}
+
+/* Design: Geologica 500, 20/1.2 -> 32/36, centered, room for two lines. */
+.title {
+  display: grid;
+  align-content: center;
+  inline-size: 100%;
+  min-block-size: clamp(5rem, 4.814rem + 0.762vw, 5.5rem); /* 80 -> 88 */
+  font-family: var(--font-heading);
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  text-align: center;
+  text-wrap: balance;
+  color: var(--color-text-strong);
+}
+
+.options {
+  display: grid;
+  gap: clamp(0.75rem, 0.657rem + 0.381vw, 1rem); /* 12 -> 16 */
+}
+
+/* Design: blue 04, padding 18/16 -> 24, radius 8 -> 12, Inter 500 16 -> 20. */
+.option {
+  display: block;
+  padding-block: clamp(1.125rem, 0.986rem + 0.571vw, 1.5rem);
+  padding-inline: clamp(1rem, 0.814rem + 0.762vw, 1.5rem);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+  font-size: var(--text-body-large);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.option:hover {
+  border-color: var(--color-border);
+}
+
+/*
+ * The native radio stays in the accessibility tree and keeps keyboard support,
+ * but is never drawn: unlike the global .visually-hidden utility, it must stay
+ * hidden while focused, because the label shows the focus ring instead.
+ */
+.radio {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The state lives in the native radio; the label only reflects it. */
+.option:has(:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-surface-selected);
+  box-shadow: var(--shadow-selected);
+}
+
+.option:has(:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.message {
+  margin-block-start: 0.75rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Empty, they must take no room but stay in the accessibility tree: a live
+   region removed with display: none is not announced when it gets text. */
+.message:empty {
+  position: absolute;
+  margin: 0;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Pushed to the bottom of the screen, whatever the height of the question. */
+  margin-block-start: auto;
+  padding-block: 2.5rem;
+}
+
+/* Design: 36px square, radius 4, blue 04, 24px arrow. */
+.arrow {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+}
+
+.arrow:hover:not([aria-disabled='true']) {
+  background: var(--color-light-blue-01);
+}
+
+.arrow[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* A larger tap area on touch screens without changing the 36px look. */
+@media (pointer: coarse) {
+  .arrow {
+    position: relative;
+  }
+
+  .arrow::after {
+    content: '';
+    position: absolute;
+    inset: -0.375rem;
+  }
+}
+
+.arrowBack {
+  rotate: 180deg;
+}
+
+.counter {
+  font-size: var(--text-body-large);
+  color: var(--color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option,
+  .progress::-webkit-progress-value {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  /* The custom bar is drawn with backgrounds, which forced colors remove. */
+  .progress {
+    appearance: auto;
+  }
+
+  .option:has(:checked) {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+  }
+}

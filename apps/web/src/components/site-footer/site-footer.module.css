@@ -1,0 +1,14 @@
+/* Design: cyan 950, top corners rounded 24, logo and one line of text. */
+.footer {
+  display: grid;
+  gap: 1.5rem;
+  /* Design: 60px of space between the last section and the footer. */
+  margin-block-start: clamp(2rem, 1.35rem + 2.667vw, 3.75rem);
+  padding-block: 2.5rem;
+  padding-inline: var(--page-gutter);
+  border-start-start-radius: 1.5rem;
+  border-start-end-radius: 1.5rem;
+  background: var(--color-cyan-950);
+  color: var(--color-white);
+  line-height: 1.375;
+}

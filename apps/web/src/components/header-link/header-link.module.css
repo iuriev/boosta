@@ -1,0 +1,25 @@
+/* "Sign out" in the design: Inter 500 16/1.5, dark blue 02. */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  /* A comfortable tap target without changing the visual size of the text. */
+  min-block-size: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  color: var(--color-accent);
+}
+
+.link[aria-busy='true'] {
+  opacity: 0.6;
+}

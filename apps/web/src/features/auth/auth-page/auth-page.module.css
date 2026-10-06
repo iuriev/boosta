@@ -1,0 +1,54 @@
+.page {
+  min-block-size: 100dvh;
+  background: var(--color-surface-page);
+}
+
+/* Design: content starts 32px (mobile) to 80px (desktop) below the header. */
+.main {
+  display: grid;
+  gap: clamp(1.5rem, 1.314rem + 0.762vw, 2rem); /* 24 -> 32 */
+  padding-block: clamp(2rem, 0.886rem + 4.571vw, 5rem) 2rem;
+  padding-inline: var(--page-gutter);
+}
+
+.intro {
+  display: grid;
+  gap: clamp(0.75rem, 0.657rem + 0.381vw, 1rem); /* 12 -> 16 */
+  text-align: center;
+}
+
+.title {
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+.title :global(.accent) {
+  color: var(--color-accent);
+}
+
+.subtitle {
+  font-size: var(--text-body-large);
+  color: var(--color-text-muted);
+}
+
+.intro[data-size='large'] .title {
+  font-size: var(--text-title-large);
+}
+
+.intro[data-size='large'] .subtitle {
+  font-weight: 500;
+}
+
+/* Sign in: Geologica 20 -> 32, subtitle Inter 14 -> 16 in dark blue 02. */
+.intro[data-size='medium'] {
+  gap: 0.25rem;
+}
+
+.intro[data-size='medium'] .title {
+  font-size: var(--text-heading);
+}
+
+.intro[data-size='medium'] .subtitle {
+  font-size: clamp(0.875rem, 0.829rem + 0.19vw, 1rem);
+  color: var(--color-text);
+}

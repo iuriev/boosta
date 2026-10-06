@@ -1,0 +1,10 @@
+.link {
+  display: inline-block;
+  border-radius: var(--radius-sm);
+}
+
+/* 131 x 24 in the 390px frames, 184 x 33 in the 1440px frames. */
+.image {
+  inline-size: clamp(8.1875rem, 6.957rem + 5.048vw, 11.5rem);
+  block-size: auto;
+}

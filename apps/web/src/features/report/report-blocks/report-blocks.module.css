@@ -1,0 +1,156 @@
+/* Design: sections are 1080px wide, 40px apart vertically; Geologica 500 title, Inter body. */
+.section {
+  display: grid;
+  gap: clamp(1rem, 0.536rem + 1.905vw, 2.25rem); /* 16 -> 36 */
+  inline-size: 100%;
+  max-inline-size: var(--content-width);
+  margin-inline: auto;
+  padding-block: clamp(1.25rem, 0.786rem + 1.905vw, 2.5rem); /* 20 -> 40 */
+}
+
+.heading {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: var(--text-heading);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.body {
+  font-size: var(--text-body-large);
+  color: var(--color-text-muted);
+}
+
+/* "Understanding Your Score": a 4px rounded line on the leading edge, text 20px from it. */
+.section[data-variant='callout'] {
+  position: relative;
+  gap: clamp(0.75rem, 0.564rem + 0.762vw, 1.25rem); /* 12 -> 20 */
+  padding-inline-start: 1.25rem;
+}
+
+.section[data-variant='callout']::before {
+  content: '';
+  position: absolute;
+  inset-block: clamp(1.25rem, 0.786rem + 1.905vw, 2.5rem);
+  inset-inline-start: 0;
+  /* A border, not a background, so the line survives forced-colors mode. */
+  border-inline-start: 0.25rem solid var(--color-callout-line);
+  border-radius: 0.25rem;
+}
+
+.checklist {
+  display: grid;
+  gap: clamp(0.75rem, 0.657rem + 0.381vw, 1rem); /* 12 -> 16 */
+}
+
+.checkItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: var(--text-body-large);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Design: 28px circle in cyan 50 with a 16px check. Sized in em so it follows the text. */
+.checkIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 1.4em;
+  block-size: 1.4em;
+  border-radius: 50%;
+  background: var(--color-cyan-50);
+}
+
+.checkIcon img {
+  inline-size: 0.8em;
+  block-size: 0.8em;
+}
+
+.bullets {
+  display: grid;
+  gap: 0.75rem;
+  padding-inline-start: 1.5rem;
+  list-style: disc;
+  font-size: var(--text-body-large);
+  color: var(--color-text-muted);
+}
+
+.bullets li::marker {
+  color: var(--color-blue-02);
+}
+
+/* The FAQ block is centered under its own title and has more room above it. */
+.faq {
+  gap: clamp(1.5rem, 0.943rem + 2.286vw, 3rem); /* 24 -> 48 */
+  padding-block: clamp(2rem, 1.35rem + 2.667vw, 3.75rem); /* 32 -> 60 */
+}
+
+.faqTitle {
+  text-align: center;
+  color: var(--color-text-strong);
+}
+
+.faqList {
+  display: grid;
+  gap: clamp(0.5rem, 0.314rem + 0.762vw, 1rem); /* 8 -> 16 */
+}
+
+/* Design: question row with a divider under it; the answer sits below the divider. */
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-block-end: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+/* Design: 36px circle with a 1px blue 02 border and a 12px chevron. */
+.faqIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+/* The exported chevron points up, which is the open state. */
+.faqIcon img {
+  rotate: 180deg;
+  transition: rotate 150ms ease;
+}
+
+.faqItem[open] .faqIcon img {
+  rotate: 0deg;
+}
+
+.faqAnswer {
+  padding: 0.75rem 0.75rem 1rem;
+  font-size: var(--text-body-large);
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faqIcon img {
+    transition: none;
+  }
+}

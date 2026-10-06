@@ -16,6 +16,7 @@
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @boosta/api test:e2e",
     "dev:api": "pnpm --filter @boosta/api dev",
+    "dev:web": "pnpm --filter @boosta/web dev",
     "typecheck": "pnpm -r --if-present typecheck",
     "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "db:down": "docker compose -f docker-compose.dev.yml down"
@@ -30,8 +31,9 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.12.0",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.8",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.13.0",

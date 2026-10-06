@@ -1,0 +1,21 @@
+.header {
+  display: grid;
+  gap: clamp(0.5rem, 0.314rem + 0.762vw, 1rem); /* 8 -> 16 */
+  padding-block: clamp(0.5rem, 0.221rem + 1.143vw, 1.25rem); /* 8 -> 20 */
+  padding-inline: var(--page-gutter);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  /* Keeps the header the same height with or without actions. */
+  min-block-size: 2.75rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 0.471rem + 1.143vw, 1.5rem);
+}

@@ -1,0 +1,65 @@
+/* Design: gauge 240px wide inside the hero, "52 / 100" below the needle pivot. */
+.gauge {
+  position: relative;
+  inline-size: clamp(9.5rem, 7.457rem + 8.381vw, 15rem); /* 152 -> 240 */
+  flex: none;
+}
+
+.dial {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+}
+
+.track {
+  stroke: var(--color-gauge-track);
+}
+
+.segment1 {
+  stroke: var(--color-gauge-1);
+}
+
+.segment2 {
+  fill: var(--color-gauge-2);
+}
+
+.segment3 {
+  stroke: var(--color-gauge-3);
+}
+
+.segment4 {
+  fill: var(--color-gauge-4);
+}
+
+.segment5 {
+  stroke: var(--color-gauge-5);
+}
+
+/* Gaps between segments take the color of the surface behind the gauge. */
+.separators {
+  stroke: var(--gauge-surface, var(--color-light-blue-02));
+}
+
+.needle {
+  fill: var(--color-cyan-950);
+}
+
+/* Design: Geologica 500 24px, centered, 162px from the top of a 220px box. */
+.value {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 3%;
+  font-family: var(--font-heading);
+  font-size: clamp(1rem, 0.814rem + 0.762vw, 1.5rem); /* 16 -> 24 */
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  color: var(--color-slate-score);
+}
+
+@media (forced-colors: active) {
+  .needle {
+    fill: CanvasText;
+  }
+}

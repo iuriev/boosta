@@ -12,12 +12,11 @@ describe('Throttling of credential endpoints (e2e)', () => {
   let app: INestApplication<App>;
   let helpers: typeof Helpers;
 
-  const attemptLogin = (ip?: string) => {
-    const call = request(app.getHttpServer())
+  const attemptLogin = (ip: string, email = 'nobody@example.com') =>
+    request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email: 'nobody@example.com', password: 'whatever' });
-    return ip ? call.set('X-Forwarded-For', ip) : call;
-  };
+      .set('X-Forwarded-For', ip)
+      .send({ email, password: 'whatever' });
 
   beforeAll(async () => {
     // The limit is read when AppModule is first loaded, so it is set before that.
@@ -32,7 +31,7 @@ describe('Throttling of credential endpoints (e2e)', () => {
     process.env.AUTH_RATE_LIMIT_PER_MINUTE = originalLimit;
   });
 
-  it('rejects sign-in requests above the limit', async () => {
+  it('rejects sign-in requests for one account above the limit', async () => {
     for (let attempt = 0; attempt < LIMIT; attempt += 1) {
       await attemptLogin('203.0.113.10').expect(401);
     }
@@ -41,13 +40,29 @@ describe('Throttling of credential endpoints (e2e)', () => {
     expect(response.body).toMatchObject({ statusCode: 429 });
   });
 
+  it('treats the same email in another case as the same account', async () => {
+    for (let attempt = 0; attempt < LIMIT; attempt += 1) {
+      await attemptLogin('203.0.113.15', 'Victim@Example.com').expect(401);
+    }
+
+    await attemptLogin('203.0.113.15', ' victim@example.COM ').expect(429);
+  });
+
   it('counts each client separately', async () => {
     await attemptLogin('203.0.113.20').expect(401);
   });
 
+  it('counts each account separately for one client', async () => {
+    for (let attempt = 0; attempt < LIMIT; attempt += 1) {
+      await attemptLogin('203.0.113.25', 'first@example.com').expect(401);
+    }
+
+    await attemptLogin('203.0.113.25', 'second@example.com').expect(401);
+  });
+
   it('shares one budget between sign-in and registration', async () => {
     for (let attempt = 0; attempt < LIMIT; attempt += 1) {
-      await attemptLogin('203.0.113.50').expect(401);
+      await attemptLogin('203.0.113.50', 'shared@example.com').expect(401);
     }
 
     await request(app.getHttpServer())
@@ -58,16 +73,27 @@ describe('Throttling of credential endpoints (e2e)', () => {
   });
 
   it('limits registration as well', async () => {
-    const register = (index: number) =>
+    const register = () =>
       request(app.getHttpServer())
         .post('/api/auth/register')
         .set('X-Forwarded-For', '203.0.113.30')
-        .send({ email: `user${String(index)}@example.com`, password: helpers.PASSWORD });
+        .send({ email: 'repeat@example.com', password: helpers.PASSWORD });
 
-    for (let attempt = 0; attempt < LIMIT; attempt += 1) {
-      await register(attempt).expect(201);
+    // The first request creates the account, the next ones sign in to it.
+    await register().expect(201);
+    for (let attempt = 1; attempt < LIMIT; attempt += 1) {
+      await register().expect(200);
     }
-    await register(LIMIT).expect(429);
+    await register().expect(429);
+  });
+
+  it('caps what one client can send across many accounts', async () => {
+    const clientLimit = LIMIT * 10;
+    for (let attempt = 0; attempt < clientLimit; attempt += 1) {
+      await attemptLogin('203.0.113.60', `user${String(attempt)}@example.com`).expect(401);
+    }
+
+    await attemptLogin('203.0.113.60', 'one-more@example.com').expect(429);
   });
 
   it('does not limit other routes', async () => {

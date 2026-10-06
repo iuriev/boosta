@@ -1,0 +1,49 @@
+/* Design: full-width light blue band, title on the left and gauge on the right. */
+.hero {
+  padding-block: 1.5rem;
+  padding-inline: var(--page-gutter);
+  background: var(--color-light-blue-02);
+  --gauge-surface: var(--color-light-blue-02);
+}
+
+.heroInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  max-inline-size: var(--content-width);
+  margin-inline: auto;
+}
+
+.heroText {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.heroTitle {
+  font-size: var(--text-display);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.level {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+}
+
+/* On narrow screens the gauge moves under the title and both are centered. */
+@media (width < 34rem) {
+  .heroInner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.sections {
+  padding-block: clamp(0.75rem, 0.286rem + 1.905vw, 2rem) 0;
+  padding-inline: var(--page-gutter);
+}

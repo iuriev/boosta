@@ -1,0 +1,27 @@
+/* Shared by the error, not-found and loading screens. */
+.page {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 1rem;
+  min-block-size: 100dvh;
+  padding: var(--page-gutter);
+  background: var(--color-surface-page);
+  text-align: center;
+}
+
+.title {
+  font-size: var(--text-heading);
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.text {
+  font-size: var(--text-body-large);
+  color: var(--color-text-muted);
+}
+
+.text a {
+  color: var(--color-accent);
+  font-weight: 500;
+}
