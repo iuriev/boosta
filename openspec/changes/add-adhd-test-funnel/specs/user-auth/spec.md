@@ -46,6 +46,10 @@ When a registration request uses an email that already belongs to an account, th
 - **WHEN** a visitor finishes the quiz and submits the registration form with an existing account's email and its correct password
 - **THEN** the user is signed in and the new attempt becomes the account's current attempt
 
+#### Scenario: Existing email, correct password, invalid claim token
+- **WHEN** a visitor submits the registration form with an existing account's email, its correct password and a claim token that is unknown, already used or expired
+- **THEN** the user is signed in, no attempt is claimed and the response says so
+
 #### Scenario: Existing email, wrong password
 - **WHEN** a visitor submits the registration form with an existing account's email and a wrong password
 - **THEN** the system rejects the request, starts no session and leaves the attempt unclaimed
@@ -56,6 +60,10 @@ The system SHALL start a session for a request with an email and password that m
 #### Scenario: Correct credentials
 - **WHEN** a user submits the email and password of their account
 - **THEN** a session is started and the user can open their report
+
+#### Scenario: Sign-in with an invalid claim token
+- **WHEN** a user submits correct credentials together with a claim token that is unknown, already used or expired
+- **THEN** the user is signed in, no attempt is claimed and the response says so
 
 #### Scenario: Wrong credentials
 - **WHEN** a sign-in request has an unknown email or a wrong password
@@ -86,8 +94,15 @@ The system SHALL serve report and account data only for the authenticated user o
 - **WHEN** two different users each request their report
 - **THEN** each receives only the report built from their own attempt
 
+### Requirement: Credential endpoints accept JSON only
+The system SHALL refuse request bodies that are not JSON, so that a form on another site cannot submit credentials and sign a visitor in to an account chosen by that site.
+
+#### Scenario: Cross-site form post
+- **WHEN** a sign-in request arrives with a form-encoded, multipart or plain-text body
+- **THEN** the system rejects it and sets no session cookie
+
 ### Requirement: Throttling of credential endpoints
-The system SHALL limit the rate of registration and sign-in requests per client and reject requests above the limit.
+The system SHALL limit the combined rate of registration and sign-in requests per client and reject requests above the limit.
 
 #### Scenario: Too many sign-in attempts
 - **WHEN** a client exceeds the allowed number of sign-in requests within the limit window

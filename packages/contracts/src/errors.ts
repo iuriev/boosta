@@ -8,7 +8,11 @@ export type ApiErrorCode =
   /** The answers do not match the quiz version (missing, duplicated or unknown keys). */
   | 'ATTEMPT_INVALID'
   /** The claim token is unknown, already used or expired: the quiz must be retaken. */
-  | 'CLAIM_TOKEN_INVALID';
+  | 'CLAIM_TOKEN_INVALID'
+  /** Unknown email or wrong password; deliberately not distinguished. */
+  | 'INVALID_CREDENTIALS'
+  /** Registration with an email that has an account, and a password that does not match it. */
+  | 'EMAIL_ALREADY_REGISTERED';
 
 /** Body of every error response. */
 export interface ApiErrorBody {

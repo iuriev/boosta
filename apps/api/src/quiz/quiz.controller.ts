@@ -1,10 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../auth/public.decorator';
 import { QuizDto } from './dto/quiz.dto';
 import { QuizService } from './quiz.service';
 
 @ApiTags('quiz')
+@Public()
 @Controller('quiz')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}

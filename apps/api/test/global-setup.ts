@@ -11,4 +11,11 @@ export default async function globalSetup(): Promise<void> {
 
   process.env.DATABASE_URL = container.getConnectionUri();
   process.env.NODE_ENV = 'test';
+  process.env.JWT_SECRET = 'test-secret-test-secret-test-secret-0123';
+  // Password hashing dominates test time at the production cost factor.
+  process.env.BCRYPT_ROUNDS = '4';
+  // One test client makes far more auth requests than a real one; the limit has its own test.
+  process.env.AUTH_RATE_LIMIT_PER_MINUTE = '1000';
+  // supertest connects over loopback; this lets tests act as different clients.
+  process.env.TRUST_PROXY = 'loopback';
 }

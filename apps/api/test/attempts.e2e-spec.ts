@@ -9,6 +9,7 @@ import { DataSource } from 'typeorm';
 import { AttemptsService } from '../src/attempts/attempts.service';
 import {
   buildSubmission,
+  createUser,
   fetchQuiz,
   publishVersionTwo,
   resetDatabase,
@@ -217,7 +218,7 @@ describe('Attempts (e2e)', () => {
     };
 
     it('attaches the attempt to the user and consumes the token', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       const claimToken = await submitAnonymously(app, buildSubmission(quiz));
 
       await attemptsService.claim(claimToken, userId);
@@ -232,12 +233,12 @@ describe('Attempts (e2e)', () => {
     });
 
     it('rejects a token that was already used, for the same and for another user', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       const claimToken = await submitAnonymously(app, buildSubmission(quiz));
       await attemptsService.claim(claimToken, userId);
 
       await expectInvalidToken(attemptsService.claim(claimToken, userId));
-      await expectInvalidToken(attemptsService.claim(claimToken, randomUUID()));
+      await expectInvalidToken(attemptsService.claim(claimToken, await createUser(app)));
 
       const [attempt] = await attemptRows();
       expect(attempt?.user_id).toBe(userId);
@@ -246,9 +247,11 @@ describe('Attempts (e2e)', () => {
     it('lets only one of two concurrent claims win', async () => {
       const claimToken = await submitAnonymously(app, buildSubmission(quiz));
 
+      const [first, second] = [await createUser(app), await createUser(app)];
+
       const results = await Promise.allSettled([
-        attemptsService.claim(claimToken, randomUUID()),
-        attemptsService.claim(claimToken, randomUUID()),
+        attemptsService.claim(claimToken, first),
+        attemptsService.claim(claimToken, second),
       ]);
 
       expect(results.map((result) => result.status).sort()).toEqual(['fulfilled', 'rejected']);
@@ -258,7 +261,7 @@ describe('Attempts (e2e)', () => {
       const claimToken = await submitAnonymously(app, buildSubmission(quiz));
       await dataSource.query(`UPDATE attempts SET claim_expires_at = now() - interval '1 second'`);
 
-      await expectInvalidToken(attemptsService.claim(claimToken, randomUUID()));
+      await expectInvalidToken(attemptsService.claim(claimToken, await createUser(app)));
 
       const [attempt] = await attemptRows();
       expect(attempt?.user_id).toBeNull();
@@ -267,11 +270,11 @@ describe('Attempts (e2e)', () => {
     it('rejects a token that was never issued', async () => {
       await submitAnonymously(app, buildSubmission(quiz));
 
-      await expectInvalidToken(attemptsService.claim('x'.repeat(43), randomUUID()));
+      await expectInvalidToken(attemptsService.claim('x'.repeat(43), await createUser(app)));
     });
 
     it('rolls back together with the transaction it takes part in', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       const claimToken = await submitAnonymously(app, buildSubmission(quiz));
 
       await expect(
@@ -289,7 +292,7 @@ describe('Attempts (e2e)', () => {
 
   describe('retakes', () => {
     it('makes the new attempt current and keeps the earlier one with its answers', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       await attemptsService.claim(
         await submitAnonymously(app, buildSubmission(quiz, 'strongly_disagree')),
         userId,
@@ -313,7 +316,7 @@ describe('Attempts (e2e)', () => {
     });
 
     it('attaches a submission made while signed in directly, without a claim token', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
 
       const result = await attemptsService.submit(buildSubmission(quiz), userId);
 
@@ -323,7 +326,7 @@ describe('Attempts (e2e)', () => {
     });
 
     it('keeps the answer to a question that a newer version dropped', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       await attemptsService.claim(await submitAnonymously(app, buildSubmission(quiz)), userId);
 
       await publishVersionTwo(app);
@@ -341,7 +344,7 @@ describe('Attempts (e2e)', () => {
     });
 
     it('keeps the more recently submitted attempt current when an older one is claimed late', async () => {
-      const userId = randomUUID();
+      const userId = await createUser(app);
       const olderToken = await submitAnonymously(app, buildSubmission(quiz, 'disagree'));
       await dataSource.query(`UPDATE attempts SET created_at = now() - interval '1 hour'`);
       const newerToken = await submitAnonymously(app, buildSubmission(quiz, 'agree'));
@@ -356,8 +359,8 @@ describe('Attempts (e2e)', () => {
     });
 
     it('does not show one user the attempts of another', async () => {
-      const first = randomUUID();
-      const second = randomUUID();
+      const first = await createUser(app);
+      const second = await createUser(app);
       await attemptsService.claim(await submitAnonymously(app, buildSubmission(quiz)), first);
 
       expect(await attemptsService.findCurrentForUser(second)).toBeNull();

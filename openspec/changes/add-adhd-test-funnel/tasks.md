@@ -30,12 +30,12 @@
 
 ## 5. Authentication
 
-- [ ] 5.1 Add the `users` entity and migration with a case-insensitive unique email; verify with a test that the same email in a different case is rejected
-- [ ] 5.2 Implement the JWT cookie session, the global auth guard, `@Public()` and the optional-auth variant; verify with e2e tests that a protected route rejects a missing or tampered cookie
-- [ ] 5.3 Implement `POST /api/auth/register` including the existing-email-with-correct-password path; verify with e2e tests for success with a claim token, success without one (account with no attempt), an invalid claim token, short password, existing email with correct password and with wrong password
-- [ ] 5.4 Implement `POST /api/auth/login` (with optional claim), `POST /api/auth/logout` and `GET /api/auth/me`; verify with e2e tests for correct and wrong credentials, claim on sign-in and sign-out
-- [ ] 5.5 Make `POST /api/attempts` attach directly to a signed-in user; verify with an e2e test that after a signed-in retake the new attempt is current and the earlier one is still stored
-- [ ] 5.6 Add throttling to the register and login routes; verify with an e2e test that requests above the limit are rejected
+- [x] 5.1 Add the `users` entity and migration with a case-insensitive unique email; verify with a test that the same email in a different case is rejected
+- [x] 5.2 Implement the JWT cookie session, the global auth guard, `@Public()` and the optional-auth variant; verify with e2e tests that a protected route rejects a missing or tampered cookie
+- [x] 5.3 Implement `POST /api/auth/register` including the existing-email-with-correct-password path; verify with e2e tests for success with a claim token, success without one (account with no attempt), an invalid claim token, short password, existing email with correct password and with wrong password
+- [x] 5.4 Implement `POST /api/auth/login` (with optional claim), `POST /api/auth/logout` and `GET /api/auth/me`; verify with e2e tests for correct and wrong credentials, claim on sign-in and sign-out
+- [x] 5.5 Make `POST /api/attempts` attach directly to a signed-in user; verify with an e2e test that after a signed-in retake the new attempt is current and the earlier one is still stored
+- [x] 5.6 Add throttling to the register and login routes; verify with an e2e test that requests above the limit are rejected
 
 ## 6. Report
 

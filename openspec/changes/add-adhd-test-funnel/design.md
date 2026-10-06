@@ -121,7 +121,7 @@ All routes are under `/api`.
 
 ### Same-origin cookies through a Next.js rewrite
 
-The browser talks only to the Next.js origin; `next.config` rewrites `/api/:path*` to the API's internal URL. The cookie is therefore first-party, there is no CORS configuration, and `SameSite=Lax` gives CSRF protection for the state-changing POSTs. Server components call the API directly over the internal URL and forward the incoming `cookie` header.
+The browser talks only to the Next.js origin; `next.config` rewrites `/api/:path*` to the API's internal URL. The cookie is therefore first-party and there is no CORS configuration. `SameSite=Lax` keeps the session cookie off cross-site POSTs, and the API refuses any non-JSON body, which is what stops a foreign HTML form from signing a visitor in to an attacker's account (a form cannot send `application/json`). The API trusts `X-Forwarded-For` only from the network named in `TRUST_PROXY`, so rate limiting sees real clients behind the Next.js hop without letting direct callers choose their own key. Server components call the API directly over the internal URL and forward the incoming `cookie` header.
 
 ### Frontend structure
 

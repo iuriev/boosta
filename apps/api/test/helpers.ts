@@ -1,4 +1,4 @@
-import type { Quiz, SubmitAttemptRequest } from '@boosta/contracts';
+import type { AuthResponse, Quiz, SubmitAttemptRequest } from '@boosta/contracts';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
@@ -6,12 +6,12 @@ import { DataSource } from 'typeorm';
 
 /**
  * Removes everything tests create and restores what the migrations created:
- * no attempts, quiz version 1 only and active. All e2e files share one
+ * no users, no attempts, quiz version 1 only and active. All e2e files share one
  * database, so each file calls this after every test.
  */
 export async function resetDatabase(app: INestApplication): Promise<void> {
   const dataSource = app.get(DataSource);
-  await dataSource.query(`TRUNCATE "attempts" CASCADE`);
+  await dataSource.query(`TRUNCATE "users", "attempts" CASCADE`);
   await dataSource.query(`UPDATE "quiz_versions" SET "is_active" = false WHERE "version" <> 1`);
   await dataSource.query(`UPDATE "quiz_versions" SET "is_active" = true WHERE "version" = 1`);
   await dataSource.query(`DELETE FROM "quiz_versions" WHERE "version" <> 1`);
@@ -78,4 +78,71 @@ export async function publishVersionTwo(app: INestApplication): Promise<string> 
     }
     return row.id;
   });
+}
+
+let userCounter = 0;
+
+/** Inserts an account directly, for tests that need an owner but not the auth flow. */
+export async function createUser(app: INestApplication): Promise<string> {
+  userCounter += 1;
+  const [row] = await app
+    .get(DataSource)
+    .query<{ id: string }[]>(
+      `INSERT INTO "users" ("email", "password_hash") VALUES ($1, 'not-a-real-hash') RETURNING "id"`,
+      [`user-${String(userCounter)}-${String(Date.now())}@example.com`],
+    );
+  if (!row) {
+    throw new Error('User was not inserted');
+  }
+  return row.id;
+}
+
+export const PASSWORD = 'correct horse battery';
+
+export interface Session {
+  /** `session=...`, ready for a Cookie header. */
+  cookie: string;
+  /** The raw Set-Cookie header, for asserting attributes. */
+  setCookie: string;
+  body: AuthResponse;
+}
+
+function readSession(response: request.Response): Session {
+  const setCookie = (response.headers['set-cookie'] as unknown as string[] | undefined)?.find(
+    (header) => header.startsWith('session='),
+  );
+  if (!setCookie) {
+    throw new Error('The response did not set a session cookie');
+  }
+  return {
+    cookie: setCookie.split(';')[0] ?? '',
+    setCookie,
+    body: response.body as AuthResponse,
+  };
+}
+
+export async function register(
+  app: INestApplication<App>,
+  email: string,
+  claimToken?: string,
+  password = PASSWORD,
+): Promise<Session> {
+  const response = await request(app.getHttpServer())
+    .post('/api/auth/register')
+    .send({ email, password, claimToken })
+    .expect(201);
+  return readSession(response);
+}
+
+export async function login(
+  app: INestApplication<App>,
+  email: string,
+  claimToken?: string,
+  password = PASSWORD,
+): Promise<Session> {
+  const response = await request(app.getHttpServer())
+    .post('/api/auth/login')
+    .send({ email, password, claimToken })
+    .expect(200);
+  return readSession(response);
 }
