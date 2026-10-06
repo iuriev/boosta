@@ -18,5 +18,9 @@ operations:
   apply:
     guidance:
       - Implement one task group at a time, then stop and wait for the owner's confirmation before starting the next group
-      - Make one Conventional Commit per task group and push it to main
+      - Before any HTML, CSS or client-side JavaScript work in apps/web, load the modern-web-guidance skill and follow it
+      - After implementing a group, run the code-reviewer subagent on its diff and resolve every blocking finding
+      - Then run the qa-tester subagent to verify the group's spec scenarios against the running system
+      - Make one Conventional Commit per task group and push it to main, only after both subagents pass
+      - In the stop report, include the reviewer's findings and the tester's results as they were returned
       - Do not add scope beyond tasks.md; record ideas in the README section on what was not done

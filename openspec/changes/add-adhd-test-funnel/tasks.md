@@ -47,6 +47,7 @@
 
 ## 7. Web application
 
+- [ ] 7.0 Load the `modern-web-guidance` skill and note in the group's commit body which of its recommendations shaped the markup, CSS and client code; verify the skill was consulted before the first component is written
 - [ ] 7.1 Scaffold the Next.js app with the `/api` rewrite, a typed API client for browser and server use, global styles and design tokens; verify the app builds and the rewrite reaches the API
 - [ ] 7.2 Build the shared UI (header with logo, button, text field, progress bar, option list, footer) with CSS Modules; verify they render on the pages that use them
 - [ ] 7.3 Implement the start screen with gender selection and the quiz flow with back and forward arrows, the "current/total" counter, `sessionStorage` persistence and submission from the last question; verify manually that the forward arrow is disabled until an answer is chosen, reload restores progress and finishing the quiz leads to account creation
@@ -58,13 +59,14 @@
 
 - [ ] 8.1 Add Dockerfiles for both apps and `docker-compose.yml` that starts PostgreSQL, the API and the web app; verify that `docker compose up --build` on empty volumes serves the start screen and the five seeded questions with no extra command
 - [ ] 8.2 Add the GitHub Actions workflow for lint, typecheck, unit tests, e2e tests and build; verify the workflow passes on the pushed branch
-- [ ] 8.3 Write the README (how to run and test, key architectural decisions, trade-offs including the registration shortcut and its proper design, how quiz and report changes are handled, what was not done and why); verify every documented command runs as written
+- [ ] 8.3 Write the README (how to run and test, key architectural decisions, trade-offs including the registration shortcut and its proper design, how quiz and report changes are handled, what was not done and why, and the AI-assisted workflow with OpenSpec, the project subagents and the skills used); verify every documented command runs as written
 - [ ] 8.4 Write `CLAUDE.md` with the commands and architecture overview for future sessions; verify the documented commands match the root scripts
 
 ## 9. Integration check
 
 - [ ] 9.1 Run the full flow against docker-compose: quiz, account creation, report, sign out, sign in, retake with a different outcome; verify each step matches the specs
-- [ ] 9.2 Run `openspec validate add-adhd-test-funnel --strict` together with `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`; verify all pass
+- [ ] 9.2 Run the `code-reviewer` subagent over the whole codebase and the `qa-tester` subagent over every spec scenario; verify there are no blocking findings and no failing scenarios
+- [ ] 9.3 Run `openspec validate add-adhd-test-funnel --strict` together with `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`; verify all pass
 
 ## Workflow follow-up
 

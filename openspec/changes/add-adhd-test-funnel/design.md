@@ -144,6 +144,17 @@ Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `
 - `docker-compose.yml` starts PostgreSQL, the API and the web app; `docker-compose.dev.yml` starts only PostgreSQL for local development.
 - GitHub Actions runs lint, typecheck, tests and build on every push and pull request.
 
+### AI-assisted workflow
+
+The project is built with Claude Code and keeps its working agreement in the repository:
+
+- OpenSpec holds the proposal, specs, design and tasks; implementation follows `tasks.md` one group at a time.
+- `.claude/agents/code-reviewer.md` is a read-only subagent that reviews each group's diff against the specs and the invariants of this design before the commit.
+- `.claude/agents/qa-tester.md` is a read-only subagent that runs the checks and exercises the running API and database against the spec scenarios.
+- Frontend work loads the `modern-web-guidance` skill first, so markup, CSS and client-side code follow current platform practice (native form validation hooks, `details`-based disclosure for the FAQ, logical properties, container-friendly layout, accessible focus states).
+
+The README describes this workflow in a short section.
+
 ## Risks / Trade-offs
 
 - [Registering with an existing email signs the user in, so the registration form confirms that an email is registered and doubles as a login form] → Requested as a time-saving shortcut. The README documents it as temporary and describes the proper flow: always answer "check your inbox", verify email ownership, and attach the attempt only after an explicit sign-in.
