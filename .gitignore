@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store
+.idea/
+.tmp-figma/
