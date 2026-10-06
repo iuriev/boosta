@@ -9,3 +9,4 @@ coverage/
 .idea/
 .tmp-figma/
 docs/test-task-brief.pdf
+*.tsbuildinfo

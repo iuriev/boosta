@@ -9,10 +9,10 @@
 
 ## 2. API foundation
 
-- [ ] 2.1 Scaffold the NestJS app with validated environment config, global `ValidationPipe`, `/api` prefix, helmet and cookie parsing; verify the app boots and an unknown route returns a JSON 404
-- [ ] 2.2 Configure TypeORM with `synchronize: false`, a data source for the migration CLI and migrations applied on start; verify `pnpm --filter api migration:run` works against the dev database
-- [ ] 2.3 Add Swagger UI at `/api/docs` outside production; verify the page loads and lists the routes
-- [ ] 2.4 Add the e2e test harness (Testcontainers PostgreSQL, migrations, supertest against the real app) with one smoke test; verify `pnpm --filter api test:e2e` passes
+- [x] 2.1 Scaffold the NestJS app with validated environment config, global `ValidationPipe`, `/api` prefix, helmet and cookie parsing; verify the app boots and an unknown route returns a JSON 404
+- [x] 2.2 Configure TypeORM with `synchronize: false`, a data source for the migration CLI and migrations applied on start; verify `pnpm --filter api migration:run` works against the dev database
+- [x] 2.3 Add Swagger UI at `/api/docs` outside production; verify the page loads and lists the routes
+- [x] 2.4 Add the e2e test harness (Testcontainers PostgreSQL, migrations, supertest against the real app) with one smoke test; verify `pnpm --filter api test:e2e` passes
 
 ## 3. Quiz versions
 
