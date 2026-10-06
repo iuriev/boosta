@@ -55,6 +55,7 @@ export async function submitAnonymously(
 /** Publishes and activates a second quiz version the way a migration would. */
 export async function publishVersionTwo(app: INestApplication): Promise<string> {
   const definition = JSON.stringify({
+    schemaVersion: 1,
     questions: [
       { key: 'lose_track_of_time', text: 'I lose track of time' },
       { key: 'restless_when_idle', text: 'I feel restless when I have nothing to do' },
@@ -77,6 +78,18 @@ export async function publishVersionTwo(app: INestApplication): Promise<string> 
       throw new Error('Version 2 was not inserted');
     }
     return row.id;
+  });
+}
+
+/**
+ * Moves the submission time of every stored attempt into the past. The database
+ * refuses this in normal operation, so the guard is lifted for the one statement.
+ */
+export async function backdateAttempts(app: INestApplication, interval: string): Promise<void> {
+  await app.get(DataSource).transaction(async (manager) => {
+    await manager.query(`ALTER TABLE "attempts" DISABLE TRIGGER "attempts_facts_immutable"`);
+    await manager.query(`UPDATE "attempts" SET "created_at" = now() - $1::interval`, [interval]);
+    await manager.query(`ALTER TABLE "attempts" ENABLE TRIGGER "attempts_facts_immutable"`);
   });
 }
 

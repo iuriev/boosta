@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 
 import { AttemptsService } from '../src/attempts/attempts.service';
 import {
+  backdateAttempts,
   buildSubmission,
   createUser,
   fetchQuiz,
@@ -220,6 +221,29 @@ describe('Attempts (e2e)', () => {
       await expect(insertAnswer('misplace_things', 'agree')).resolves.toBeDefined();
     });
 
+    it('reports a missing attempt as such when an answer is written for one', async () => {
+      await expect(
+        dataSource.query(
+          `INSERT INTO attempt_answers (attempt_id, question_key, option_key)
+           VALUES ('00000000-0000-4000-8000-000000000000', 'misplace_things', 'agree')`,
+        ),
+      ).rejects.toThrow(/foreign key constraint/);
+    });
+
+    it.each([
+      ['its quiz version', `quiz_version_id = (SELECT id FROM quiz_versions WHERE version = 2)`],
+      ['its gender', `gender = 'male'`],
+      ['its submission time', `created_at = now() - interval '1 day'`],
+      ['its id', `id = gen_random_uuid()`],
+    ])('does not allow an attempt to change %s', async (_name, assignment) => {
+      await submitAnonymously(app, buildSubmission(quiz));
+      await publishVersionTwo(app);
+
+      await expect(dataSource.query(`UPDATE attempts SET ${assignment}`)).rejects.toThrow(
+        /immutable/,
+      );
+    });
+
     it('does not allow a version with attempts to be deleted', async () => {
       await submitAnonymously(app, buildSubmission(quiz));
 
@@ -365,7 +389,7 @@ describe('Attempts (e2e)', () => {
     it('keeps the more recently submitted attempt current when an older one is claimed late', async () => {
       const userId = await createUser(app);
       const olderToken = await submitAnonymously(app, buildSubmission(quiz, 'disagree'));
-      await dataSource.query(`UPDATE attempts SET created_at = now() - interval '1 hour'`);
+      await backdateAttempts(app, '1 hour');
       const newerToken = await submitAnonymously(app, buildSubmission(quiz, 'agree'));
 
       await attemptsService.claim(newerToken, userId);

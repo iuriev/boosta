@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 
+import type * as AuthModule from '../src/auth/auth.module';
 import type * as Helpers from './helpers';
 import type * as TestApp from './test-app';
 
@@ -11,6 +12,7 @@ describe('Throttling of credential endpoints (e2e)', () => {
   const originalLimit = process.env.AUTH_RATE_LIMIT_PER_MINUTE;
   let app: INestApplication<App>;
   let helpers: typeof Helpers;
+  let clientLimit: number;
 
   const attemptLogin = (ip: string, email = 'nobody@example.com') =>
     request(app.getHttpServer())
@@ -22,6 +24,8 @@ describe('Throttling of credential endpoints (e2e)', () => {
     // The limit is read when AppModule is first loaded, so it is set before that.
     process.env.AUTH_RATE_LIMIT_PER_MINUTE = String(LIMIT);
     helpers = jest.requireActual<typeof Helpers>('./helpers');
+    clientLimit =
+      LIMIT * jest.requireActual<typeof AuthModule>('../src/auth/auth.module').CLIENT_LIMIT_FACTOR;
     app = await jest.requireActual<typeof TestApp>('./test-app').createTestApp();
   });
 
@@ -88,7 +92,6 @@ describe('Throttling of credential endpoints (e2e)', () => {
   });
 
   it('caps what one client can send across many accounts', async () => {
-    const clientLimit = LIMIT * 10;
     for (let attempt = 0; attempt < clientLimit; attempt += 1) {
       await attemptLogin('203.0.113.60', `user${String(attempt)}@example.com`).expect(401);
     }

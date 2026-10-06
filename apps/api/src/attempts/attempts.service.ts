@@ -125,6 +125,10 @@ export class AttemptsService {
     });
   }
 
+  hasAttempt(userId: string): Promise<boolean> {
+    return this.attempts.existsBy({ userId });
+  }
+
   /** The attempt the report is built from: the most recently submitted one. */
   async findCurrentForUser(userId: string): Promise<Attempt | null> {
     const [current] = await this.findRecentForUser(userId, 1);

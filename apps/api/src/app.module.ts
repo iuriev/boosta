@@ -11,7 +11,13 @@ import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validateEnv,
+      // Tests set everything they need; a developer's .env must not leak into
+      // them. Not keyed on NODE_ENV, which some tests set to "production".
+      ignoreEnvFile: process.env.JEST_WORKER_ID !== undefined,
+    }),
     DatabaseModule,
     QuizModule,
     AttemptsModule,

@@ -40,7 +40,7 @@ The system SHALL require a syntactically valid email and a password of 8 to 72 c
 - **THEN** the system treats it as the same account
 
 ### Requirement: Registration with an already registered email
-When a registration request uses an email that already belongs to an account, the system SHALL sign the user in and attach the claimed attempt if the password matches that account, and SHALL reject the request without revealing whether the password was wrong otherwise.
+When a registration request uses an email that already belongs to an account, the system SHALL sign the user in and attach the claimed attempt if the password matches that account, and SHALL otherwise reject the request, saying that the email already has an account, without creating a session or attaching the attempt.
 
 #### Scenario: Existing email, correct password
 - **WHEN** a visitor finishes the quiz and submits the registration form with an existing account's email and its correct password

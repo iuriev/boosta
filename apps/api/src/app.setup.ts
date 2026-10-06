@@ -17,9 +17,11 @@ export const API_PREFIX = 'api';
 export function setupApp(app: NestExpressApplication): void {
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
-  // Browsers reach the API through the Next.js server. Trusting that hop's
-  // X-Forwarded-For lets rate limiting see the real client instead of counting
-  // every visitor as the proxy. It is off unless configured, because trusting
+  // Which peers may name the client in X-Forwarded-For. Unset, the header is
+  // ignored and the rate-limit key is the connecting address: behind the web
+  // app that is the web app itself, so all its visitors share one budget.
+  // Set it only to the address of a proxy that overwrites the header; the web
+  // app forwards it only when its own TRUST_FORWARDED_HEADERS is on. Trusting
   // the header from anyone would let a caller pick its own rate-limit key.
   const trustProxy = config.get('TRUST_PROXY', { infer: true });
   if (trustProxy) {

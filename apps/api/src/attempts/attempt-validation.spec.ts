@@ -2,6 +2,7 @@ import type { QuizDefinition } from '../quiz/quiz-definition';
 import { findAnswerProblems } from './attempt-validation';
 
 const definition: QuizDefinition = {
+  schemaVersion: 1,
   questions: [
     { key: 'focus', text: 'Focus?' },
     { key: 'memory', text: 'Memory?' },

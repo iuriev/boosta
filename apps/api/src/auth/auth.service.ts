@@ -112,7 +112,7 @@ export class AuthService {
     }
     return {
       user: { id: user.id, email: user.email },
-      hasAttempt: (await this.attemptsService.findCurrentForUser(user.id)) !== null,
+      hasAttempt: await this.attemptsService.hasAttempt(user.id),
     };
   }
 
@@ -146,7 +146,7 @@ export class AuthService {
     return {
       body: {
         user: { id: user.id, email: user.email },
-        hasAttempt: (await this.attemptsService.findCurrentForUser(user.id)) !== null,
+        hasAttempt: await this.attemptsService.hasAttempt(user.id),
         attemptClaimed,
       },
       sessionToken: await this.jwtService.signAsync(payload),

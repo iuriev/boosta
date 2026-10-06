@@ -3,6 +3,7 @@ import { scoreAttempt } from './scoring';
 
 /** The shape of the first published quiz: five questions, options worth 4 to 0, threshold 60. */
 const versionOne: QuizDefinition = {
+  schemaVersion: 1,
   questions: ['q1', 'q2', 'q3', 'q4', 'q5'].map((key) => ({ key, text: key })),
   options: [
     { key: 'strongly_agree', label: 'Strongly agree', score: 4 },
@@ -86,6 +87,7 @@ describe('scoreAttempt', () => {
 
   it('uses the weights and threshold of the version it is given', () => {
     const versionTwo: QuizDefinition = {
+      schemaVersion: 1,
       questions: [
         { key: 'a', text: 'A' },
         { key: 'b', text: 'B' },

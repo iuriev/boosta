@@ -36,10 +36,14 @@ The system SHALL treat a published quiz version as immutable. Changing questions
 - **THEN** the previous version and every attempt that references it remain unchanged and readable
 
 ### Requirement: A quiz version has a well-formed definition
-The system SHALL refuse to store a quiz version whose definition is malformed, whichever way it is written to the database. A definition is well-formed when it has at least one question, each with a unique non-empty key and a text; at least one option, each with a unique non-empty key, a label and a numeric score that is not negative, with at least one score above zero; and a level threshold between 0 and 100.
+The system SHALL refuse to store a quiz version whose definition is malformed, whichever way it is written to the database. A definition is well-formed when it names a definition format the system knows and has at least one question, each with a unique non-empty key and a text; at least one option, each with a unique non-empty key, a label and a numeric score that is not negative, with at least one score above zero; and a level threshold between 0 and 100.
 
 #### Scenario: Malformed definition published
 - **WHEN** a quiz version is inserted with a missing threshold, duplicate keys, a negative score or no questions
+- **THEN** the database rejects it and no version is stored
+
+#### Scenario: Definition of an unknown format published
+- **WHEN** a quiz version is inserted whose definition has no format number, or a format number the system does not know
 - **THEN** the database rejects it and no version is stored
 
 ### Requirement: Exactly one quiz version is active

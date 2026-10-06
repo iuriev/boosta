@@ -5,6 +5,8 @@ import { PublishQuizVersion11791270100000 } from './1791270100000-publish-quiz-v
 import { CreateAttempts1791280000000 } from './1791280000000-create-attempts';
 import { CreateUsers1791290000000 } from './1791290000000-create-users';
 import { AddDataIntegrityChecks1791300000000 } from './1791300000000-add-data-integrity-checks';
+import { AddQuizDefinitionSchemaVersion1791310000000 } from './1791310000000-add-quiz-definition-schema-version';
+import { ProtectAttemptFacts1791320000000 } from './1791320000000-protect-attempt-facts';
 
 /**
  * Every migration, oldest first. Listed explicitly instead of through a glob
@@ -16,4 +18,6 @@ export const migrations: (new () => MigrationInterface)[] = [
   CreateAttempts1791280000000,
   CreateUsers1791290000000,
   AddDataIntegrityChecks1791300000000,
+  AddQuizDefinitionSchemaVersion1791310000000,
+  ProtectAttemptFacts1791320000000,
 ];

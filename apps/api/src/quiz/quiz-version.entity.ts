@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import type { QuizDefinition } from './quiz-definition';
+import { type QuizDefinition, readQuizDefinition } from './quiz-definition';
 
 /**
  * A published quiz. Rows are created by migrations and never edited: the
@@ -18,7 +18,16 @@ export class QuizVersion {
   @Column({ name: 'is_active', type: 'boolean', default: false })
   isActive!: boolean;
 
-  @Column({ type: 'jsonb', update: false })
+  /** Checked every time the entity is loaded, directly or through a relation. Raw SQL bypasses it. */
+  @Column({
+    type: 'jsonb',
+    update: false,
+    transformer: {
+      to: (definition: QuizDefinition) => definition,
+      from: (stored: { schemaVersion?: unknown } | null | undefined) =>
+        stored ? readQuizDefinition(stored) : stored,
+    },
+  })
   definition!: QuizDefinition;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

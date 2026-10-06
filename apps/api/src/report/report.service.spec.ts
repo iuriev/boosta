@@ -4,6 +4,7 @@ import { buildReport } from './report.service';
 import type { ReportSection } from './report-engine';
 
 const versionOne: QuizDefinition = {
+  schemaVersion: 1,
   questions: [
     { key: 'focus', text: 'Focus?' },
     { key: 'memory', text: 'Memory?' },
@@ -17,6 +18,7 @@ const versionOne: QuizDefinition = {
 
 /** A later version: one question kept, one replaced, a different scale and threshold. */
 const versionTwo: QuizDefinition = {
+  schemaVersion: 1,
   questions: [
     { key: 'focus', text: 'Focus, reworded?' },
     { key: 'sleep', text: 'Sleep?' },

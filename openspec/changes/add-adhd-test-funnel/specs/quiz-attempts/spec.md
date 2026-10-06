@@ -29,11 +29,15 @@ The system SHALL reject a submission that references a quiz version that is not 
 - **THEN** the system rejects it with an error that tells the client to reload the quiz
 
 ### Requirement: Attempts keep their quiz version and raw answers
-The system SHALL store, for every attempt, the quiz version it was taken against, the gender and the raw answer chosen for each question key. Stored answers SHALL NOT be modified when a new quiz version is published.
+The system SHALL store, for every attempt, the quiz version it was taken against, the gender and the raw answer chosen for each question key. Stored answers SHALL NOT be modified when a new quiz version is published. The quiz version, gender and submission time of a stored attempt SHALL NOT change afterwards, whichever way the database is written to; only its owner changes, when it is claimed.
 
 #### Scenario: Quiz changes after an attempt
 - **WHEN** a new quiz version replaces a question after an attempt was stored
 - **THEN** the stored attempt still references its original version and its original answers
+
+#### Scenario: Attempt re-pointed outside the application
+- **WHEN** the quiz version, gender or submission time of a stored attempt is updated directly in the database
+- **THEN** the database rejects the update
 
 ### Requirement: Stored answers refer to the attempt's quiz version
 The system SHALL refuse to store an answer whose question key or option key does not exist in the quiz version of its attempt, whichever way the answer is written to the database.

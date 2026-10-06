@@ -8,6 +8,7 @@ describe('toPublicQuiz', () => {
     isActive: true,
     createdAt: new Date(),
     definition: {
+      schemaVersion: 1,
       questions: [
         { key: 'first', text: 'First?' },
         { key: 'second', text: 'Second?' },

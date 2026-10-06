@@ -9,6 +9,7 @@ import { resetDatabase } from './helpers';
 import { createTestApp } from './test-app';
 
 const SAMPLE_DEFINITION = JSON.stringify({
+  schemaVersion: 1,
   questions: [{ key: 'sample_question', text: 'Sample?' }],
   options: [
     { key: 'yes', label: 'Yes', score: 1 },
@@ -96,6 +97,14 @@ describe('Quiz (e2e)', () => {
       expect(row).toEqual({ scores: [4, 3, 2, 1, 0], threshold: 60 });
     });
 
+    it('stamps the default quiz with the format of its document', async () => {
+      const [row] = await dataSource.query<{ schema_version: number }[]>(
+        `SELECT (definition->>'schemaVersion')::int AS schema_version FROM quiz_versions WHERE version = 1`,
+      );
+
+      expect(row).toEqual({ schema_version: 1 });
+    });
+
     it('publishes only versions that satisfy the assumptions scoring relies on', async () => {
       const versions = await dataSource.query<{ version: number; definition: QuizDefinition }[]>(
         `SELECT version, definition FROM quiz_versions`,
@@ -165,7 +174,10 @@ describe('Quiz (e2e)', () => {
         'options that cannot award any points',
         { ...base, options: [{ key: 'no', label: 'No', score: 0 }] },
       ],
-      ['no scoring', { questions: base.questions, options: base.options }],
+      ['no scoring', { schemaVersion: 1, questions: base.questions, options: base.options }],
+      ['no format number', { ...base, schemaVersion: undefined }],
+      ['a format number that is not a number', { ...base, schemaVersion: '1' }],
+      ['a format this database has not been taught', { ...base, schemaVersion: 2 }],
       ['a threshold above 100', { ...base, scoring: { highThreshold: 101 } }],
       ['a negative threshold', { ...base, scoring: { highThreshold: -1 } }],
       ['a threshold that is not a number', { ...base, scoring: { highThreshold: '60' } }],
