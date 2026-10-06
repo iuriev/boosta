@@ -13,7 +13,8 @@ workspace with two separate applications and one shared package:
   exports only a `types` condition: import from it with `import type`, and keep runtime values
   (such as lists for validation) in the app that needs them.
 
-`README.md` explains the architecture, trade-offs and how to run the project. Behavior is
+`README.md` explains how to run the project and summarises the architecture; `docs/` has the
+details (architecture and trade-offs, API, design notes, working method). Behavior is
 specified in `openspec/changes/add-adhd-test-funnel/` (specs with scenarios, `design.md`,
 `tasks.md`); read the relevant spec before changing behavior and keep it in step with the code.
 
@@ -119,5 +120,5 @@ subagent on the diff and then the `qa-tester` subagent against the spec scenario
 `.claude/agents/`), fix what they find, and make one commit for the group. Load the
 `modern-web-guidance` skill before any HTML, CSS or client-side work in `apps/web`.
 
-Local-only files that must not be committed: the brief in `docs/`, Figma extracts in `.tmp-figma/`,
+Local-only files that must not be committed: the brief PDF in `docs/` (the Markdown files there are tracked), Figma extracts in `.tmp-figma/`,
 and `.env` files.
