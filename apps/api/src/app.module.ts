@@ -7,6 +7,7 @@ import { validateEnv } from './config/env';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health/health.controller';
 import { QuizModule } from './quiz/quiz.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { QuizModule } from './quiz/quiz.module';
     QuizModule,
     AttemptsModule,
     AuthModule,
+    ReportModule,
   ],
   controllers: [HealthController],
 })

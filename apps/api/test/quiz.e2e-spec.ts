@@ -4,6 +4,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
 
+import type { QuizDefinition } from '../src/quiz/quiz-definition';
 import { resetDatabase } from './helpers';
 import { createTestApp } from './test-app';
 
@@ -93,6 +94,27 @@ describe('Quiz (e2e)', () => {
       `);
 
       expect(row).toEqual({ scores: [4, 3, 2, 1, 0], threshold: 60 });
+    });
+
+    it('publishes only versions that satisfy the assumptions scoring relies on', async () => {
+      const versions = await dataSource.query<{ version: number; definition: QuizDefinition }[]>(
+        `SELECT version, definition FROM quiz_versions`,
+      );
+
+      expect(versions.length).toBeGreaterThan(0);
+      for (const { definition } of versions) {
+        const questionKeys = definition.questions.map((question) => question.key);
+        const optionKeys = definition.options.map((option) => option.key);
+        const scores = definition.options.map((option) => option.score);
+
+        expect(questionKeys.length).toBeGreaterThan(0);
+        expect(new Set(questionKeys).size).toBe(questionKeys.length);
+        expect(new Set(optionKeys).size).toBe(optionKeys.length);
+        expect(Math.min(...scores)).toBeGreaterThanOrEqual(0);
+        expect(Math.max(...scores)).toBeGreaterThan(0);
+        expect(definition.scoring.highThreshold).toBeGreaterThanOrEqual(0);
+        expect(definition.scoring.highThreshold).toBeLessThanOrEqual(100);
+      }
     });
 
     it('does not duplicate the default quiz when the application starts again', async () => {

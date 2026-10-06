@@ -39,11 +39,11 @@
 
 ## 6. Report
 
-- [ ] 6.1 Define the report response and block union in `packages/contracts`; verify both apps typecheck against them
-- [ ] 6.2 Implement score and level calculation from an attempt and its quiz version; verify with unit tests for the scenarios in the report spec (0, 100, 70, the threshold boundary)
-- [ ] 6.3 Implement the report engine (ordered sections, `requires` check, `null` skipping, `previousAttempts` in the context); verify with unit tests using test-only sections that a section with a present key is built from the answer, a section with an absent key is omitted, and a history-based section is built for a user with two attempts and omitted for a user with one
-- [ ] 6.4 Read the report copy from the Figma copy through the Figma MCP server into content modules and implement the four sections for both levels and genders; verify with unit tests that each of the four level and gender combinations yields the expected section order and distinct content
-- [ ] 6.5 Implement `GET /api/report` for the current user; verify with e2e tests for the authenticated report, the report following the latest attempt after a retake, the unauthenticated rejection, the no-attempt case and isolation between two users
+- [x] 6.1 Define the report response and block union in `packages/contracts`; verify both apps typecheck against them
+- [x] 6.2 Implement score and level calculation from an attempt and its quiz version; verify with unit tests for the scenarios in the report spec (0, 100, 70, the threshold boundary)
+- [x] 6.3 Implement the report engine (ordered sections, `requires` check, `null` skipping, `previousAttempts` in the context); verify with unit tests using test-only sections that a section with a present key is built from the answer, a section with an absent key is omitted, and a history-based section is built for a user with two attempts and omitted for a user with one
+- [x] 6.4 Read the report copy from the Figma copy through the Figma MCP server into content modules and implement the four sections for both levels and genders; verify with unit tests that each of the four level and gender combinations yields the expected section order and distinct content
+- [x] 6.5 Implement `GET /api/report` for the current user; verify with e2e tests for the authenticated report, the report following the latest attempt after a retake, the unauthenticated rejection, the no-attempt case and isolation between two users
 
 ## 7. Web application
 

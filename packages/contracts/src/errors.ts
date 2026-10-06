@@ -12,7 +12,9 @@ export type ApiErrorCode =
   /** Unknown email or wrong password; deliberately not distinguished. */
   | 'INVALID_CREDENTIALS'
   /** Registration with an email that has an account, and a password that does not match it. */
-  | 'EMAIL_ALREADY_REGISTERED';
+  | 'EMAIL_ALREADY_REGISTERED'
+  /** The signed-in user has not taken the quiz yet. */
+  | 'REPORT_NOT_FOUND';
 
 /** Body of every error response. */
 export interface ApiErrorBody {
