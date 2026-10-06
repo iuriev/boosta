@@ -32,7 +32,7 @@
 
 - [ ] 5.1 Add the `users` entity and migration with a case-insensitive unique email; verify with a test that the same email in a different case is rejected
 - [ ] 5.2 Implement the JWT cookie session, the global auth guard, `@Public()` and the optional-auth variant; verify with e2e tests that a protected route rejects a missing or tampered cookie
-- [ ] 5.3 Implement `POST /api/auth/register` including the existing-email-with-correct-password path; verify with e2e tests for success, missing claim token, short password, existing email with correct password and with wrong password
+- [ ] 5.3 Implement `POST /api/auth/register` including the existing-email-with-correct-password path; verify with e2e tests for success with a claim token, success without one (account with no attempt), an invalid claim token, short password, existing email with correct password and with wrong password
 - [ ] 5.4 Implement `POST /api/auth/login` (with optional claim), `POST /api/auth/logout` and `GET /api/auth/me`; verify with e2e tests for correct and wrong credentials, claim on sign-in and sign-out
 - [ ] 5.5 Make `POST /api/attempts` attach directly to a signed-in user; verify with an e2e test that after a signed-in retake the new attempt is current and the earlier one is still stored
 - [ ] 5.6 Add throttling to the register and login routes; verify with an e2e test that requests above the limit are rejected
@@ -51,7 +51,7 @@
 - [ ] 7.1 Scaffold the Next.js app with the `/api` rewrite, a typed API client for browser and server use, global styles and design tokens; verify the app builds and the rewrite reaches the API
 - [ ] 7.2 Build the shared UI (header with logo, button, text field, progress bar, option list, footer) with CSS Modules; verify they render on the pages that use them
 - [ ] 7.3 Implement the start screen with gender selection and the quiz flow with back and forward arrows, the "current/total" counter, `sessionStorage` persistence and submission from the last question; verify manually that the forward arrow is disabled until an answer is chosen, reload restores progress and finishing the quiz leads to account creation
-- [ ] 7.4 Implement the account creation and sign-in pages with react-hook-form and zod, server error display, pending claim token handling, the "Already have an account? Sign in" link and redirects; verify manually registration, existing-email sign-in, wrong password and direct access without a claim token
+- [ ] 7.4 Implement the account creation and sign-in pages with react-hook-form and zod, server error display, pending claim token handling, the "Already have an account? Sign in" and "Create account" links and redirects (report when the account has an attempt, quiz start when it does not); verify manually registration, existing-email sign-in, wrong password, and registration without a finished quiz followed by taking the quiz
 - [ ] 7.5 Implement the report page as a server component with the score gauge, block renderers, FAQ accordion, sign-out, "Retake test" and redirects for 401 and 404; verify manually all four report variants and both redirects
 - [ ] 7.6 Add the header link that shows "Sign in" or "My report" by session state, and handle the signed-in retake and the outdated-quiz-version response; verify manually that a signed-in retake updates the report and an outdated version restarts the quiz
 

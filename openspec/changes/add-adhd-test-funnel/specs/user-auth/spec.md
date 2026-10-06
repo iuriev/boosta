@@ -2,20 +2,31 @@
 
 ## Purpose
 
-Provides the minimal account and session behavior needed for a user to reach their own report: registration after the quiz, sign-in, sign-out and access control.
+Provides the minimal account and session behavior needed for a user to reach their own report: registration after or before the quiz, sign-in, sign-out and access control.
 
 ## ADDED Requirements
 
 ### Requirement: Registration after the quiz
-The system SHALL create an account from an email, a password and a valid claim token, attach the claimed attempt to it and start a session. Registration without a valid claim token SHALL be rejected, because an account exists only to hold a report.
+The system SHALL create an account from an email, a password and a valid claim token, attach the claimed attempt to it and start a session. This is the primary path: a visitor takes the quiz anonymously and then creates an account to see the report.
 
-#### Scenario: Successful registration
+#### Scenario: Successful registration after the quiz
 - **WHEN** a visitor submits a new email, a valid password and a valid claim token
 - **THEN** an account is created, the attempt is attached to it and a session is started
 
-#### Scenario: Registration without a claim token
-- **WHEN** a registration request has no claim token or an invalid one
-- **THEN** the system rejects it and creates no account
+#### Scenario: Registration with an invalid claim token
+- **WHEN** a registration request carries a claim token that is unknown, already used or expired
+- **THEN** the system rejects it, creates no account and tells the client that the quiz has to be taken again
+
+### Requirement: Registration before the quiz
+The system SHALL also create an account from an email and a password without a claim token and start a session. Such an account has no attempt and therefore no report until its owner takes the quiz.
+
+#### Scenario: Successful registration without a quiz
+- **WHEN** a visitor submits a new email and a valid password without a claim token
+- **THEN** an account without an attempt is created and a session is started
+
+#### Scenario: Quiz taken after registration
+- **WHEN** a user who registered without a quiz finishes the quiz while signed in
+- **THEN** the attempt is attached to the account directly and the report is available
 
 ### Requirement: Credential rules
 The system SHALL require a syntactically valid email and a password of 8 to 72 characters. Emails SHALL be compared case-insensitively and ignoring surrounding whitespace, and SHALL be unique across accounts.
@@ -98,12 +109,20 @@ The web application SHALL show a "Sign in" link in the header of the start scree
 - **THEN** the finished attempt is claimed and the report is shown
 
 ### Requirement: Account screens in the web application
-The web application SHALL show the account creation form after the quiz is submitted and a separate sign-in page reachable at any time. Both SHALL validate the email and password before sending, show server errors next to the form, and take the user to the report on success.
+The web application SHALL show the account creation form after the quiz is submitted and a separate sign-in page reachable at any time. Both SHALL validate the email and password before sending, show server errors next to the form, and on success take the user to the report, or to the quiz start when the account has no attempt yet. The sign-in page SHALL link to the account creation page.
 
-#### Scenario: Account creation opened without a finished quiz
-- **WHEN** a visitor opens the account creation page without a pending claim token
-- **THEN** the visitor is redirected to the quiz start
+#### Scenario: Account created without a finished quiz
+- **WHEN** a visitor opens the account creation page without a pending claim token and registers
+- **THEN** the account is created and the visitor is taken to the quiz start
+
+#### Scenario: Account created after the quiz
+- **WHEN** a visitor with a pending claim token registers
+- **THEN** the visitor is taken to the report page
 
 #### Scenario: Successful sign-in
-- **WHEN** a user submits valid credentials on the sign-in page
+- **WHEN** a user who has an attempt submits valid credentials on the sign-in page
 - **THEN** the user is taken to the report page
+
+#### Scenario: Sign-in without an attempt
+- **WHEN** a user who has no attempt submits valid credentials on the sign-in page
+- **THEN** the user is taken to the quiz start

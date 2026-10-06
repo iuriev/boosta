@@ -12,6 +12,7 @@ Decisions already made with the product owner and treated as constraints here:
 - An attempt is stored anonymously as soon as the quiz is finished.
 - Every attempt is kept; the most recently submitted attempt of a user is the current one and drives the report. There is no UI for earlier attempts.
 - Registering with an existing email and a correct password signs the user in (a deliberate shortcut, see Risks).
+- Both orders are allowed: quiz then account (the brief's main path) and account then quiz. The brief describes account creation after the quiz and does not forbid the other order, so the claim token is optional at registration and an account may exist without an attempt.
 - The quiz is navigated with the back and forward arrows from the design; selecting an option does not advance.
 - Links that the design lacks but the flows need are added: "Sign in" or "My report" in the header, "Already have an account? Sign in" on account creation, "Retake test" on the report.
 - Answers to the FAQ items that are collapsed in Figma (which contains the answer only for the first item of each report) are written by us.
@@ -102,7 +103,7 @@ All routes are under `/api`.
 | --- | --- | --- | --- |
 | GET | `/quiz` | none | Active quiz version without scores |
 | POST | `/attempts` | optional | Submit answers; returns `claimToken`, or attaches directly when signed in |
-| POST | `/auth/register` | none | Create account (or sign in on existing email), claim attempt, set cookie |
+| POST | `/auth/register` | none | Create account (or sign in on existing email), claim attempt when a token is sent, set cookie |
 | POST | `/auth/login` | none | Sign in, optionally claim attempt, set cookie |
 | POST | `/auth/logout` | none | Clear cookie |
 | GET | `/auth/me` | required | Current user |
@@ -128,7 +129,7 @@ The browser talks only to the Next.js origin; `next.config` rewrites `/api/:path
 | --- | --- | --- |
 | `/` | server | Start screen with Male and Female; fetches the quiz |
 | `/quiz` | client | One question at a time; state mirrored to `sessionStorage` |
-| `/signup` | client | Account creation; requires a pending claim token |
+| `/signup` | client | Account creation; sends the pending claim token when there is one |
 | `/signin` | client | Sign-in; sends a pending claim token if one exists |
 | `/report` | server | Fetches `/report` with the cookie; redirects on 401 or 404 |
 
@@ -163,6 +164,7 @@ The README describes this workflow in a short section.
 - [Read-time computation means a report can change for a user who has already seen it when the logic changes] → Accepted by the owner. Scores stay stable because weights are frozen in the quiz version; only wording and sections move.
 - [The threshold rule differs from the designer's sticky note] → Chosen by the owner so that score and level can never contradict each other. The threshold is data in the quiz version, so it can be tuned by publishing a version.
 - [Unclaimed anonymous attempts accumulate] → Tokens expire after 24 hours and rows are tiny; a periodic cleanup job is listed in the README as not done.
+- [An account can exist without an attempt, a state the design has no screen for] → Such a user is always sent to the quiz start instead of the report, and the first attempt submitted while signed in is attached directly.
 - [A stateless JWT cannot be revoked before it expires] → Acceptable for a report-only product; sign-out clears the cookie.
 - [Publishing quiz versions through migrations requires a deploy] → Acceptable without an admin UI; it also gives review and history for free.
 - [Figma has no answer text for the collapsed FAQ items] → Short answers are written in the tone of the design, without medical claims, and the README marks them as authored placeholder content.

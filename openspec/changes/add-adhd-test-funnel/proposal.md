@@ -8,7 +8,7 @@ The repository is empty and the test task asks for a complete ADHD test funnel: 
 
 - Add a public quiz: gender selection followed by Likert-scale questions served by the API from the active quiz version.
 - Add anonymous attempt submission: answers are validated and stored on the server as soon as the quiz is finished, before any account exists, and handed back to the client as a one-time claim token.
-- Add minimal email + password accounts: registration at the end of the quiz, a separate sign-in screen, sign-out, and a session carried in an httpOnly cookie.
+- Add minimal email + password accounts: registration at the end of the quiz (the main path) or before taking it, a separate sign-in screen, sign-out, and a session carried in an httpOnly cookie.
 - Add attempt claiming: registering or signing in with a claim token attaches the attempt to the account. Every attempt of a user is kept; the most recently submitted one is the current attempt and drives the report, so a retake updates the result without deleting earlier answers.
 - Add the personal report: a score from 0 to 100, a High or Low ADHD traits level, and an ordered list of sections whose content varies by level and gender. The report is computed on every read from the stored answers by the current report logic.
 - Add a section mechanism in which a section declares the question keys it needs and is omitted when an attempt's quiz version does not contain them.
