@@ -17,6 +17,17 @@ The system SHALL return the active quiz version to any visitor without requiring
 - **WHEN** a visitor requests the active quiz
 - **THEN** the response contains no option scores and no level threshold
 
+### Requirement: The first quiz version exists on a fresh installation
+The system SHALL provide the first quiz version, with the five questions and five answer options from the design, as part of its own startup on an empty database. No manual seeding step SHALL be needed before the quiz can be taken.
+
+#### Scenario: First start on an empty database
+- **WHEN** the system is started for the first time with an empty database and a visitor opens the web application
+- **THEN** the start screen is shown and the quiz presents its five questions
+
+#### Scenario: Restart with existing data
+- **WHEN** the system is restarted with a database that already contains the first quiz version
+- **THEN** the quiz version is not duplicated and existing attempts are untouched
+
 ### Requirement: Quiz versions are immutable
 The system SHALL treat a published quiz version as immutable. Changing questions, options, option scores or the level threshold SHALL be done by publishing a new version, never by editing an existing one.
 
@@ -39,15 +50,23 @@ Each question SHALL have a key that identifies its meaning independently of its 
 - **THEN** the question keeps the same key in the new version
 
 ### Requirement: Quiz flow in the web application
-The web application SHALL ask the visitor to choose Male or Female before the first question, then present one question at a time with a progress indicator and the position in the form "current/total". The visitor SHALL be able to go back to previous questions and change answers, and SHALL NOT be able to finish the quiz with an unanswered question.
+The web application SHALL ask the visitor to choose Male or Female before the first question, then present one question at a time with a progress indicator and the position in the form "current/total". Each question SHALL have a back control and a forward control. The forward control SHALL be disabled until the current question is answered, and on the last question it SHALL submit the quiz.
 
 #### Scenario: Visitor answers a question
-- **WHEN** the visitor selects an option on a question that is not the last one
-- **THEN** the answer is recorded and the next question is shown
+- **WHEN** the visitor selects an option
+- **THEN** the option is shown as selected, the forward control becomes enabled and the same question stays on screen
+
+#### Scenario: Visitor moves forward
+- **WHEN** the visitor activates the forward control on an answered question that is not the last one
+- **THEN** the next question is shown
+
+#### Scenario: Visitor finishes the quiz
+- **WHEN** the visitor activates the forward control on the answered last question
+- **THEN** the answers are submitted
 
 #### Scenario: Visitor goes back
-- **WHEN** the visitor navigates back to a previous question
-- **THEN** the previously selected option is shown as selected and can be changed
+- **WHEN** the visitor activates the back control
+- **THEN** the previous question is shown with its selected option, which can be changed; on the first question the start screen is shown
 
 #### Scenario: Progress survives a page reload
 - **WHEN** the visitor reloads the page in the middle of the quiz

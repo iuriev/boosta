@@ -82,6 +82,21 @@ The system SHALL limit the rate of registration and sign-in requests per client 
 - **WHEN** a client exceeds the allowed number of sign-in requests within the limit window
 - **THEN** further requests are rejected until the window passes
 
+### Requirement: Entry points to sign-in and the report
+The web application SHALL show a "Sign in" link in the header of the start screen and the quiz for a visitor without a session, and a "My report" link in its place for a signed-in user. The account creation page SHALL link to the sign-in page for visitors who already have an account. The start screen SHALL be shown to signed-in users as well, so that a retake follows the same path as a first attempt.
+
+#### Scenario: Visitor without a session opens the start screen
+- **WHEN** a visitor without a session opens the start screen
+- **THEN** the header shows a "Sign in" link
+
+#### Scenario: Signed-in user opens the start screen
+- **WHEN** a signed-in user opens the start screen
+- **THEN** the start screen is shown with a "My report" link in the header instead of "Sign in"
+
+#### Scenario: Visitor with a finished quiz already has an account
+- **WHEN** a visitor on the account creation page follows the link to sign in and signs in
+- **THEN** the finished attempt is claimed and the report is shown
+
 ### Requirement: Account screens in the web application
 The web application SHALL show the account creation form after the quiz is submitted and a separate sign-in page reachable at any time. Both SHALL validate the email and password before sending, show server errors next to the form, and take the user to the report on success.
 

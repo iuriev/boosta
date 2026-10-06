@@ -18,7 +18,7 @@
 
 - [ ] 3.1 Define the quiz and attempt types in `packages/contracts`; verify both apps typecheck against them
 - [ ] 3.2 Add the `quiz_versions` entity and migration with the partial unique index on the active flag; verify with a test that a second active version is rejected by the database
-- [ ] 3.3 Add the migration that publishes quiz version 1 (five questions with stable keys, five options scored 4 to 0, threshold 60); verify the row exists after migrating
+- [ ] 3.3 Add the migration that publishes quiz version 1 as the default seed (the five questions from the design with stable keys, five options scored 4 to 0, threshold 60); verify with an e2e test that an empty database serves the five questions after startup and that starting again does not duplicate the version
 - [ ] 3.4 Implement `GET /api/quiz` returning the active version without scores or threshold; verify with e2e tests for the response shape and the absence of scoring data
 
 ## 4. Attempts
@@ -49,14 +49,14 @@
 
 - [ ] 7.1 Scaffold the Next.js app with the `/api` rewrite, a typed API client for browser and server use, global styles and design tokens; verify the app builds and the rewrite reaches the API
 - [ ] 7.2 Build the shared UI (header with logo, button, text field, progress bar, option list, footer) with CSS Modules; verify they render on the pages that use them
-- [ ] 7.3 Implement the start screen with gender selection and the quiz flow with `sessionStorage` persistence, back navigation and submission; verify manually that reload restores progress and that finishing the quiz leads to account creation
-- [ ] 7.4 Implement the account creation and sign-in pages with react-hook-form and zod, server error display, pending claim token handling and redirects; verify manually registration, existing-email sign-in, wrong password and direct access without a claim token
-- [ ] 7.5 Implement the report page as a server component with the score gauge, block renderers, FAQ accordion, sign-out and redirects for 401 and 404; verify manually all four report variants and both redirects
-- [ ] 7.6 Handle the signed-in retake and the outdated-quiz-version response; verify manually that a signed-in retake updates the report and an outdated version restarts the quiz
+- [ ] 7.3 Implement the start screen with gender selection and the quiz flow with back and forward arrows, the "current/total" counter, `sessionStorage` persistence and submission from the last question; verify manually that the forward arrow is disabled until an answer is chosen, reload restores progress and finishing the quiz leads to account creation
+- [ ] 7.4 Implement the account creation and sign-in pages with react-hook-form and zod, server error display, pending claim token handling, the "Already have an account? Sign in" link and redirects; verify manually registration, existing-email sign-in, wrong password and direct access without a claim token
+- [ ] 7.5 Implement the report page as a server component with the score gauge, block renderers, FAQ accordion, sign-out, "Retake test" and redirects for 401 and 404; verify manually all four report variants and both redirects
+- [ ] 7.6 Add the header link that shows "Sign in" or "My report" by session state, and handle the signed-in retake and the outdated-quiz-version response; verify manually that a signed-in retake updates the report and an outdated version restarts the quiz
 
 ## 8. Delivery
 
-- [ ] 8.1 Add Dockerfiles for both apps and `docker-compose.yml` that starts PostgreSQL, the API and the web app; verify `docker compose up --build` serves the full flow on a clean machine state
+- [ ] 8.1 Add Dockerfiles for both apps and `docker-compose.yml` that starts PostgreSQL, the API and the web app; verify that `docker compose up --build` on empty volumes serves the start screen and the five seeded questions with no extra command
 - [ ] 8.2 Add the GitHub Actions workflow for lint, typecheck, unit tests, e2e tests and build; verify the workflow passes on the pushed branch
 - [ ] 8.3 Write the README (how to run and test, key architectural decisions, trade-offs including the registration shortcut and its proper design, how quiz and report changes are handled, what was not done and why); verify every documented command runs as written
 - [ ] 8.4 Write `CLAUDE.md` with the commands and architecture overview for future sessions; verify the documented commands match the root scripts

@@ -13,3 +13,10 @@ context: |
 rules:
   tasks:
     - Each task group ends in a state that passes lint, typecheck and tests, so it can be committed on its own
+
+operations:
+  apply:
+    guidance:
+      - Implement one task group at a time, then stop and wait for the owner's confirmation before starting the next group
+      - Make one Conventional Commit per task group and push it to main
+      - Do not add scope beyond tasks.md; record ideas in the README section on what was not done

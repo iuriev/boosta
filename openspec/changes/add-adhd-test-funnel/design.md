@@ -12,6 +12,9 @@ Decisions already made with the product owner and treated as constraints here:
 - An attempt is stored anonymously as soon as the quiz is finished.
 - Every attempt is kept; the most recently submitted attempt of a user is the current one and drives the report. There is no UI for earlier attempts.
 - Registering with an existing email and a correct password signs the user in (a deliberate shortcut, see Risks).
+- The quiz is navigated with the back and forward arrows from the design; selecting an option does not advance.
+- Links that the design lacks but the flows need are added: "Sign in" or "My report" in the header, "Already have an account? Sign in" on account creation, "Retake test" on the report.
+- Answers to the FAQ items that are collapsed in Figma (which contains the answer only for the first item of each report) are written by us.
 
 ## Goals / Non-Goals
 
@@ -56,7 +59,7 @@ attempt_answers   attempt_id FK ON DELETE CASCADE, question_key text,
 users             id uuid PK, email citext UNIQUE, password_hash text, created_at
 ```
 
-- `quiz_versions.definition` is one immutable JSON document: ordered questions (`key`, `text`), ordered options (`key`, `label`, `score`) and `scoring.highThreshold`. A version is read and written as a whole and never edited, so a document fits better than normalized question and option tables, and it is impossible to edit one question of a published version by accident. Versions are published by migrations, which makes each publication reviewable and reproducible. The partial unique index enforces "exactly one active version" in the database.
+- `quiz_versions.definition` is one immutable JSON document: ordered questions (`key`, `text`), ordered options (`key`, `label`, `score`) and `scoring.highThreshold`. A version is read and written as a whole and never edited, so a document fits better than normalized question and option tables, and it is impossible to edit one question of a published version by accident. Versions are published by migrations, which makes each publication reviewable and reproducible. Because the API applies pending migrations on start, a fresh installation has quiz version 1 as soon as it is up, with no separate seeding command; running migrations again is a no-op. The partial unique index enforces "exactly one active version" in the database.
 - `attempt_answers` is a table rather than a JSON column because answers are the long-lived asset: future report sections and analytics query them by `question_key`. It stores keys, not scores or texts, so it stays valid whatever happens to later versions.
 - A user owns any number of attempts. The current attempt is the one with the latest `created_at` (the submission time), found through the `(user_id, created_at DESC)` index. A retake only inserts or attaches a row and never deletes one, so answers given under earlier quiz versions survive and remain available to future report sections. Ordering by submission time rather than claim time means that claiming an old anonymous attempt late cannot push a newer result out of the report.
 - No score, level or report is stored. Both are pure functions of the attempt and its quiz version.
@@ -129,7 +132,7 @@ The browser talks only to the Next.js origin; `next.config` rewrites `/api/:path
 | `/signin` | client | Sign-in; sends a pending claim token if one exists |
 | `/report` | server | Fetches `/report` with the cookie; redirects on 401 or 404 |
 
-Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `claimToken`) persisted to `sessionStorage`. Selecting an option advances to the next question; the last question submits. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules with design tokens as CSS custom properties, approximating the Figma layout.
+Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `claimToken`) persisted to `sessionStorage`. Selecting an option only marks it; the forward arrow, disabled until the question is answered, moves on and submits on the last question, and the back arrow on the first question returns to the start screen. The header shows "Sign in" or "My report" depending on `GET /auth/me`. A signed-in user who retakes the quiz is sent straight to `/report`, since the API attaches the attempt directly. A `QUIZ_VERSION_OUTDATED` response clears the stored state and restarts the quiz. Forms use react-hook-form with zod schemas local to the web app. Styling is CSS Modules with design tokens as CSS custom properties, approximating the Figma layout.
 
 ### Tooling
 
@@ -151,4 +154,5 @@ Quiz state is a single reducer (`gender`, `answers`, `index`, `quizVersionId`, `
 - [Unclaimed anonymous attempts accumulate] → Tokens expire after 24 hours and rows are tiny; a periodic cleanup job is listed in the README as not done.
 - [A stateless JWT cannot be revoked before it expires] → Acceptable for a report-only product; sign-out clears the cookie.
 - [Publishing quiz versions through migrations requires a deploy] → Acceptable without an admin UI; it also gives review and history for free.
-- [The Figma file is view-only and one part of the Emotional Regulation text was not captured during analysis] → Exact copy is transcribed from the Figma file when the report content module is written.
+- [Figma has no answer text for the collapsed FAQ items] → Short answers are written in the tone of the design, without medical claims, and the README marks them as authored placeholder content.
+- [The Figma file is view-only, so copy is transcribed by hand] → Section texts are taken from the Figma layer tree and checked against the rendered frames when the content module is written.

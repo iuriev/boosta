@@ -99,7 +99,11 @@ Each section in the report response SHALL carry a type from a fixed set of prese
 - **THEN** it renders the score with the level, then each section in the given order according to its block type
 
 ### Requirement: Report page in the web application
-The web application SHALL show the report only to a signed-in user. It SHALL display the score as "score / 100" with the level label, the sections in order, the frequently asked questions as expandable items, and a sign-out control.
+The web application SHALL show the report only to a signed-in user. It SHALL display the score as "score / 100" with the level label, the sections in order, the frequently asked questions as expandable items, a sign-out control and a control to retake the test.
+
+#### Scenario: User retakes the test from the report
+- **WHEN** a signed-in user activates the retake control on the report page
+- **THEN** the quiz start screen is shown and the user stays signed in
 
 #### Scenario: Signed-out visitor opens the report page
 - **WHEN** a visitor without a session opens the report page
