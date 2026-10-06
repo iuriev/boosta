@@ -2,12 +2,13 @@ import type { MeResponse, Quiz, Report } from '@boosta/contracts';
 import { cookies } from 'next/headers';
 
 import { ApiError, toApiError } from './api-error';
+import { API_ENDPOINTS } from './endpoints';
 
 const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
- * Calls the API from the Next.js server (server components), forwarding the
- * visitor's cookies so the API sees the same session the browser has.
+ * API calls made on the Next.js server, by server components. The visitor's
+ * cookies are forwarded so the API sees the same session the browser has.
  */
 async function serverRequest<T>(path: string): Promise<T> {
   // Reading the cookies first marks the page as rendered per request, so the
@@ -30,7 +31,7 @@ async function serverRequest<T>(path: string): Promise<T> {
 }
 
 export function fetchQuiz(): Promise<Quiz> {
-  return serverRequest<Quiz>('/quiz');
+  return serverRequest<Quiz>(API_ENDPOINTS.quiz);
 }
 
 /**
@@ -42,7 +43,7 @@ export async function fetchCurrentUser(
   { optional }: { optional: boolean } = { optional: false },
 ): Promise<MeResponse | null> {
   try {
-    return await serverRequest<MeResponse>('/auth/me');
+    return await serverRequest<MeResponse>(API_ENDPOINTS.me);
   } catch (error) {
     if (optional || (error instanceof ApiError && error.status === 401)) {
       return null;
@@ -57,7 +58,7 @@ export type ReportResult =
 /** The report, or the reason there is none, so the page can decide where to send the visitor. */
 export async function fetchReport(): Promise<ReportResult> {
   try {
-    return { status: 'ok', report: await serverRequest<Report>('/report') };
+    return { status: 'ok', report: await serverRequest<Report>(API_ENDPOINTS.report) };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       return { status: 'signed-out' };

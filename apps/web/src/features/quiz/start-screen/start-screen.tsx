@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/button';
+import { ROUTES } from '@/config/routes';
 import { cx } from '@/lib/cx';
 
 import { loadQuizProgress, saveQuizProgress } from '../quiz-storage';
@@ -25,7 +26,7 @@ export function StartScreen({ quiz }: { quiz: Quiz }) {
       answers: resumable?.answers ?? {},
       index: resumable?.index ?? 0,
     });
-    router.push('/quiz');
+    router.push(ROUTES.quiz);
   };
 
   return (

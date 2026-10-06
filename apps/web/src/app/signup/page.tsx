@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import { homeFor } from '@/config/routes';
 import { AuthForm } from '@/features/auth/auth-form';
 import { AuthPage } from '@/features/auth/auth-page';
 import { PendingResultText } from '@/features/auth/pending-result-text';
-import { fetchCurrentUser } from '@/lib/api/server';
+import { fetchCurrentUser } from '@/lib/api/server-api';
 
 export const metadata: Metadata = { title: 'Create your account' };
 
 export default async function SignUpPage() {
   const user = await fetchCurrentUser();
   if (user) {
-    redirect(user.hasAttempt ? '/report' : '/');
+    redirect(homeFor(user));
   }
 
   return (

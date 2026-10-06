@@ -1,6 +1,7 @@
 import type { MeResponse } from '@boosta/contracts';
 
 import { HeaderLink } from '@/components/header-link';
+import { ROUTES } from '@/config/routes';
 
 import { SignOutButton } from '../sign-out-button';
 
@@ -11,10 +12,10 @@ import { SignOutButton } from '../sign-out-button';
  */
 export function SessionActions({ user }: { user: MeResponse | null }) {
   if (!user) {
-    return <HeaderLink href="/signin">Sign in</HeaderLink>;
+    return <HeaderLink href={ROUTES.signIn}>Sign in</HeaderLink>;
   }
   if (user.hasAttempt) {
-    return <HeaderLink href="/report">My report</HeaderLink>;
+    return <HeaderLink href={ROUTES.report}>My report</HeaderLink>;
   }
   return <SignOutButton />;
 }

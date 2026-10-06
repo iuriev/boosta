@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation';
 import { HeaderLink } from '@/components/header-link';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { ROUTES } from '@/config/routes';
 import { SignOutButton } from '@/features/auth/sign-out-button';
 import { ReportView } from '@/features/report/report-view';
-import { fetchReport } from '@/lib/api/server';
+import { fetchReport } from '@/lib/api/server-api';
 
 import styles from './page.module.css';
 
@@ -15,10 +16,10 @@ export const metadata: Metadata = { title: 'Your ADHD report' };
 export default async function ReportPage() {
   const result = await fetchReport();
   if (result.status === 'signed-out') {
-    redirect('/signin');
+    redirect(ROUTES.signIn);
   }
   if (result.status === 'no-attempt') {
-    redirect('/');
+    redirect(ROUTES.start);
   }
 
   return (
@@ -26,7 +27,7 @@ export default async function ReportPage() {
       <SiteHeader
         actions={
           <>
-            <HeaderLink href="/">Retake test</HeaderLink>
+            <HeaderLink href={ROUTES.start}>Retake test</HeaderLink>
             <SignOutButton />
           </>
         }

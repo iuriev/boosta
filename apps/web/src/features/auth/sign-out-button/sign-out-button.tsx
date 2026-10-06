@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { headerLinkStyles } from '@/components/header-link';
+import { ROUTES } from '@/config/routes';
 import { clearClaimToken, clearQuizProgress } from '@/features/quiz/quiz-storage';
-import { apiRequest } from '@/lib/api/client';
+import { authService } from '@/lib/api/auth-service';
 
 export function SignOutButton() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export function SignOutButton() {
     setPending(true);
     setFailed(false);
     try {
-      await apiRequest('/auth/logout', { method: 'POST' });
+      await authService.logout();
     } catch {
       // Still signed in: say so instead of sending the user to a page that
       // would bounce them straight back.
@@ -28,7 +29,7 @@ export function SignOutButton() {
     // Nothing of this user's quiz may be left for the next person on this tab.
     clearQuizProgress();
     clearClaimToken();
-    router.replace('/signin');
+    router.replace(ROUTES.signIn);
     router.refresh();
   };
 

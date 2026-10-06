@@ -46,6 +46,24 @@ export default tseslint.config(
     settings: { next: { rootDir: 'apps/web' } },
   },
   {
+    // Pages and components reach the API through the services in lib/api,
+    // never through the HTTP client itself.
+    files: ['apps/web/src/{app,components,features}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/lib/api/client',
+              message: 'Call a service from @/lib/api (auth-service, attempts-service) instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: { globals: globals.node },
   },

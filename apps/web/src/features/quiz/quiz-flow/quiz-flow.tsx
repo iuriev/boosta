@@ -1,13 +1,14 @@
 'use client';
 
-import type { Quiz, SubmitAttemptRequest, SubmitAttemptResponse } from '@boosta/contracts';
+import type { Quiz, SubmitAttemptRequest } from '@boosta/contracts';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 
 import { SiteHeader } from '@/components/site-header';
+import { ROUTES, startWithNotice } from '@/config/routes';
 import { ApiError } from '@/lib/api/api-error';
-import { apiRequest } from '@/lib/api/client';
+import { attemptsService } from '@/lib/api/attempts-service';
 import { cx } from '@/lib/cx';
 import { useIsClient } from '@/lib/use-is-client';
 
@@ -52,7 +53,7 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
     if (isClient && !progress && !leaving) {
       // No gender chosen yet, or the saved answers belong to a replaced quiz.
       clearQuizProgress();
-      router.replace('/');
+      router.replace(ROUTES.start);
     }
   }, [isClient, progress, leaving, router]);
 
@@ -98,7 +99,7 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
     setHint(null);
     setError(null);
     if (index === 0) {
-      router.push('/');
+      router.push(ROUTES.start);
       return;
     }
     update({ ...progress, index: index - 1 });
@@ -116,26 +117,23 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
     setSubmitting(true);
     setError(null);
     try {
-      const { claimToken } = await apiRequest<SubmitAttemptResponse>('/attempts', {
-        method: 'POST',
-        body: request,
-      });
+      const { claimToken } = await attemptsService.submit(request);
       setLeaving(true);
       clearQuizProgress();
       if (claimToken === null) {
         // Signed in: the attempt already belongs to the account.
-        router.replace('/report');
+        router.replace(ROUTES.report);
         router.refresh();
       } else {
         saveClaimToken(claimToken);
-        router.replace('/signup');
+        router.replace(ROUTES.signUp);
       }
     } catch (caught) {
       if (caught instanceof ApiError && caught.code === 'QUIZ_VERSION_OUTDATED') {
         // The quiz was replaced while it was being taken: start over with the new one.
         setLeaving(true);
         clearQuizProgress();
-        router.replace('/?notice=quiz-updated');
+        router.replace(startWithNotice('quiz-updated'));
         router.refresh();
         return;
       }

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   // The app lives in a pnpm workspace; trace files from the repository root.
   outputFileTracingRoot: path.join(import.meta.dirname, '../..'),
   poweredByHeader: false,
+  // Next.js otherwise writes AGENTS.md and CLAUDE.md into this folder when the
+  // dev server is started by an AI coding agent. The repository has its own.
+  agentRules: false,
   headers() {
     return Promise.resolve([
       {

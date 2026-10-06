@@ -8,7 +8,9 @@ An ADHD test funnel: an anonymous quiz, account creation, a personal report and 
 workspace with two separate applications and one shared package:
 
 - `apps/api` — NestJS 12, TypeORM 1.x, PostgreSQL. CommonJS application.
-- `apps/web` — Next.js 16 (App Router), React 19, CSS Modules.
+- `apps/web` — Next.js 16 (App Router), React 19, CSS Modules. Next.js 16 differs from earlier
+  versions (for example `proxy.ts` replaces middleware); its version-matched docs are in
+  `apps/web/node_modules/next/dist/docs/`.
 - `packages/contracts` — TypeScript **types only** for the HTTP API. It has no runtime code and
   exports only a `types` condition: import from it with `import type`, and keep runtime values
   (such as lists for validation) in the app that needs them.
@@ -106,6 +108,11 @@ with `ApiException`.
   Figma styles. Every length is in `rem` (hairlines use `--border-width`); sizes that differ between
   the 390px and 1440px frames are `clamp()` values. Prefer plain, readable rules; use logical
   properties, `:focus-visible` outlines and the existing `.visually-hidden` utility.
+- **Web routes and API calls:** page paths come from `apps/web/src/config/routes.ts` (`ROUTES`,
+  `homeFor`, `startWithNotice`), never from string literals. Components call the services in
+  `apps/web/src/lib/api` (`authService`, `attemptsService`, and `server-api.ts` for server
+  components); importing the HTTP client into a page or component is a lint error. API paths live
+  in `lib/api/endpoints.ts`.
 - Browser-only state (quiz progress, the pending claim token) lives in `sessionStorage` behind the
   external stores in `apps/web/src/features/quiz/quiz-storage.ts`; read it with the provided hooks,
   not in effects.

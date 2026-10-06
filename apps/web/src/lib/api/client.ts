@@ -6,6 +6,10 @@ interface RequestOptions {
 }
 
 /**
+ * The HTTP layer for calls from the browser. Components do not use it
+ * directly: they call the services built on it (`auth-service`,
+ * `attempts-service`).
+ *
  * Calls the API from the browser. Requests go to `/api` on this app's own
  * origin, so the session cookie travels with them automatically.
  */

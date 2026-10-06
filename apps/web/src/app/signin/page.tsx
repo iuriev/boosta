@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import { homeFor } from '@/config/routes';
 import { AuthForm } from '@/features/auth/auth-form';
 import { AuthPage } from '@/features/auth/auth-page';
-import { fetchCurrentUser } from '@/lib/api/server';
+import { fetchCurrentUser } from '@/lib/api/server-api';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
 export default async function SignInPage() {
   const user = await fetchCurrentUser();
   if (user) {
-    redirect(user.hasAttempt ? '/report' : '/');
+    redirect(homeFor(user));
   }
 
   return (

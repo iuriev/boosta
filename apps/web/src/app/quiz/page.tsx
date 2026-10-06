@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { SessionActions } from '@/features/auth/session-actions';
 import { QuizFlow } from '@/features/quiz/quiz-flow';
-import { fetchCurrentUser, fetchQuiz } from '@/lib/api/server';
+import { fetchCurrentUser, fetchQuiz } from '@/lib/api/server-api';
 
 export const metadata: Metadata = { title: 'ADHD traits test' };
 
