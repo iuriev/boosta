@@ -35,6 +35,13 @@ The system SHALL store, for every attempt, the quiz version it was taken against
 - **WHEN** a new quiz version replaces a question after an attempt was stored
 - **THEN** the stored attempt still references its original version and its original answers
 
+### Requirement: Stored answers refer to the attempt's quiz version
+The system SHALL refuse to store an answer whose question key or option key does not exist in the quiz version of its attempt, whichever way the answer is written to the database.
+
+#### Scenario: Answer written outside the application
+- **WHEN** an answer with a question key or an option key that the attempt's quiz version does not define is inserted directly into the database
+- **THEN** the database rejects it
+
 ### Requirement: Claim token is secret, single-use and expiring
 A claim token SHALL be unguessable, SHALL be usable once, and SHALL expire 24 hours after the attempt is submitted. The system SHALL NOT store the token in a form that allows it to be read back.
 

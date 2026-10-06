@@ -11,13 +11,20 @@ stable keys, answer options with their scores, and the threshold between "low" a
 Versions are published by migrations and never edited — a database trigger rejects changes to a
 published version, and a partial unique index allows only one active version.
 
+The document's shape is checked by the database as well (a `CHECK` constraint): questions and
+options need unique keys, scores must be numbers that are not negative, and the threshold must lie
+between 0 and 100.
+
 Changing the quiz means publishing a new version. Earlier attempts keep pointing at the version
 they were answered under, so they are always interpreted with the right questions and weights.
 
 ### 2. An attempt stores raw answers and nothing derived
 
 An attempt records the quiz version, the gender and one `(question key, option key)` row per
-answer. No score, level or report is stored. Stored answers cannot be edited (another trigger),
+answer. Question and option keys are strings rather than numeric ids on purpose: a key names the meaning of
+a question and stays the same across quiz versions, which lets a report section ask for an answer
+without knowing the version. A trigger rejects an answer whose keys are not in the quiz version of
+its attempt, which gives the integrity a foreign key would. No score, level or report is stored. Stored answers cannot be edited (another trigger),
 and attempts are never deleted: when a user takes the quiz again, the most recently submitted
 attempt simply becomes the current one, and the earlier ones stay available as history.
 
@@ -105,7 +112,8 @@ sections that ship are the ones in the design, which depend on level and gender 
   report copy needs a deploy. In exchange every change is reviewed, tested and versioned, and no
   rule language has to be stored in data. An admin UI would move this the other way.
 - **A quiz version as one JSON document.** It is read and written as a whole and never edited, so
-  a document fits better than normalised tables. All questions of a version share one set of
+  a document fits better than normalised tables. Its shape is still enforced by the database. With
+  an admin UI or a shared question bank, questions would move to their own table. All questions of a version share one set of
   answer options; per-question options would need a new document shape.
 - **Answers as rows, not JSON.** Slightly more writes, but future sections and analytics can query
   answers by question key.

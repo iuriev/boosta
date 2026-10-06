@@ -3,8 +3,8 @@
  * Everything needed to validate and score an attempt lives here, so an old
  * attempt is always interpreted with the definition it was answered under.
  *
- * Assumptions the scoring relies on (checked for every published version by
- * the e2e suite): at least one question; question and option keys unique;
+ * Assumptions the scoring relies on, enforced by the database with a CHECK
+ * constraint on the column (`quiz_definition_is_valid`): at least one question; question and option keys unique;
  * option scores are non-negative with at least one above zero, so a score of
  * 0 means "no traits"; the same options apply to every question; the
  * threshold lies between 0 and 100.

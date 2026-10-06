@@ -145,7 +145,7 @@ Each of these is explained in [docs/architecture.md](docs/architecture.md#trade-
 
 - **Deployment.** Optional in the brief. The Docker setup runs production builds locally.
 - **Email confirmation and password recovery.** Excluded by the brief.
-- **Automated frontend tests.** The time went into API tests (66 unit, 118 end-to-end), where the
+- **Automated frontend tests.** The time went into API tests (66 unit, 136 end-to-end), where the
   logic lives. The web app was verified by hand in the browser against every spec scenario, on
   mobile and desktop widths and with the keyboard only. Component tests for the quiz flow and the
   forms, and one browser test of the whole funnel, would be the next step.

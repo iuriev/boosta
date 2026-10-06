@@ -20,6 +20,7 @@
 - [x] 3.2 Add the `quiz_versions` entity and migration with the partial unique index on the active flag; verify with a test that a second active version is rejected by the database
 - [x] 3.3 Add the migration that publishes quiz version 1 as the default seed (the five questions from the design with stable keys, five options scored 4 to 0, threshold 60); verify with an e2e test that an empty database serves the five questions after startup and that starting again does not duplicate the version
 - [x] 3.4 Implement `GET /api/quiz` returning the active version without scores or threshold; verify with e2e tests for the response shape and the absence of scoring data
+- [x] 3.5 Add a database CHECK on the shape of a quiz definition (questions and options with unique keys, valid scores, threshold from 0 to 100); verify with e2e tests that each kind of malformed definition is rejected and the migration reverts
 
 ## 4. Attempts
 
@@ -27,6 +28,7 @@
 - [x] 4.2 Implement attempt validation against a quiz version (complete, no duplicates, known keys, active version, valid gender); verify with unit tests for each rejection case in the spec
 - [x] 4.3 Implement `POST /api/attempts` for anonymous visitors with claim token generation, hashed storage and 24-hour expiry; verify with e2e tests that a valid submission returns a token and an invalid one stores nothing
 - [x] 4.4 Implement the claim service (lookup by hash, expiry, single use, attach without deleting earlier attempts) and the current-attempt query (most recently submitted); verify with e2e tests for reuse, expiry, a retake that keeps the earlier attempt, and a late claim of an older attempt
+- [x] 4.5 Add a database trigger that rejects an answer whose question or option key is not in the quiz version of its attempt; verify with an e2e test that direct inserts with unknown keys fail and a valid one succeeds
 
 ## 5. Authentication
 

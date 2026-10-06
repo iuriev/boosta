@@ -201,6 +201,25 @@ describe('Attempts (e2e)', () => {
       ).rejects.toThrow(/immutable/);
     });
 
+    it('does not allow an answer whose keys are not in the quiz version, even written directly', async () => {
+      await submitAnonymously(app, buildSubmission(quiz));
+      const [attempt] = await attemptRows();
+      await dataSource.query(`DELETE FROM attempt_answers WHERE question_key = 'misplace_things'`);
+      const insertAnswer = (questionKey: string, optionKey: string) =>
+        dataSource.query(
+          `INSERT INTO attempt_answers (attempt_id, question_key, option_key) VALUES ($1, $2, $3)`,
+          [attempt?.id, questionKey, optionKey],
+        );
+
+      await expect(insertAnswer('made_up_question', 'agree')).rejects.toThrow(
+        /question "made_up_question" is not part of the quiz version/,
+      );
+      await expect(insertAnswer('misplace_things', 'sometimes')).rejects.toThrow(
+        /option "sometimes" is not part of the quiz version/,
+      );
+      await expect(insertAnswer('misplace_things', 'agree')).resolves.toBeDefined();
+    });
+
     it('does not allow a version with attempts to be deleted', async () => {
       await submitAnonymously(app, buildSubmission(quiz));
 

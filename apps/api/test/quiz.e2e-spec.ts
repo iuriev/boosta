@@ -128,6 +128,52 @@ describe('Quiz (e2e)', () => {
     });
   });
 
+  describe('the shape of a quiz definition', () => {
+    const base = JSON.parse(SAMPLE_DEFINITION) as QuizDefinition;
+    const insert = (definition: unknown) =>
+      dataSource.query(
+        `INSERT INTO quiz_versions (version, is_active, definition) VALUES (2, false, $1)`,
+        [JSON.stringify(definition)],
+      );
+
+    it('accepts a well-formed definition', async () => {
+      await expect(insert(base)).resolves.toBeDefined();
+    });
+
+    it.each<[string, unknown]>([
+      ['something that is not an object', []],
+      ['no questions', { ...base, questions: [] }],
+      ['questions that are not a list', { ...base, questions: 'none' }],
+      ['a question without a key', { ...base, questions: [{ text: 'Sample?' }] }],
+      ['a question without text', { ...base, questions: [{ key: 'sample_question' }] }],
+      [
+        'two questions with the same key',
+        { ...base, questions: [base.questions[0], base.questions[0]] },
+      ],
+      ['no options', { ...base, options: [] }],
+      ['an option without a score', { ...base, options: [{ key: 'yes', label: 'Yes' }] }],
+      [
+        'an option with a score that is not a number',
+        { ...base, options: [{ key: 'yes', label: 'Yes', score: '1' }] },
+      ],
+      [
+        'an option with a negative score',
+        { ...base, options: [...base.options, { key: 'never', label: 'Never', score: -1 }] },
+      ],
+      ['two options with the same key', { ...base, options: [base.options[0], base.options[0]] }],
+      [
+        'options that cannot award any points',
+        { ...base, options: [{ key: 'no', label: 'No', score: 0 }] },
+      ],
+      ['no scoring', { questions: base.questions, options: base.options }],
+      ['a threshold above 100', { ...base, scoring: { highThreshold: 101 } }],
+      ['a negative threshold', { ...base, scoring: { highThreshold: -1 } }],
+      ['a threshold that is not a number', { ...base, scoring: { highThreshold: '60' } }],
+    ])('rejects a definition with %s', async (_name, definition) => {
+      await expect(insert(definition)).rejects.toThrow(/quiz_versions_definition_valid/);
+    });
+  });
+
   describe('versioning', () => {
     it('rejects a second active version', async () => {
       await expect(

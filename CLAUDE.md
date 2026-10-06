@@ -58,13 +58,14 @@ The design rests on a few invariants. Changes that break them break the point of
 
 - **Quiz versions are immutable.** A version is one row in `quiz_versions` with the whole quiz as
   JSON (questions with stable keys, options with scores, the level threshold). A trigger rejects
-  edits and a partial unique index allows one active version. To change the quiz, add a migration
+  edits, a partial unique index allows one active version, and a CHECK constraint
+  (`quiz_definition_is_valid`) rejects a malformed document. To change the quiz, add a migration
   that inserts a new version and moves the active flag; never edit a published version or its
   migration. Migrations are listed explicitly in `apps/api/src/database/migrations/index.ts` and
   use raw SQL only.
 - **Attempts store raw answers, nothing derived.** `attempts` plus one `attempt_answers` row per
-  question (keys only). Score, level and report are never stored. Answers cannot be updated
-  (trigger). Attempts are never deleted on a retake: the current attempt is the most recently
+  question (keys only). Score, level and report are never stored. Answers cannot be updated and must use
+  keys that exist in the attempt's quiz version (triggers). Attempts are never deleted on a retake: the current attempt is the most recently
   submitted one.
 - **The report is computed on read.** `apps/api/src/report`: `scoreAttempt` scores an attempt with
   its **own** quiz version; `buildReport` (a pure function) turns a user's attempts into a report
