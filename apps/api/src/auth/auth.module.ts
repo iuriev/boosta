@@ -9,6 +9,7 @@ import type { Env } from '../config/env';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { normalizeEmail } from './dto/credentials.dto';
 import { SESSION_TTL_SECONDS } from './session';
 import { SessionGuard } from './session.guard';
 
@@ -17,7 +18,7 @@ export const CLIENT_LIMIT_FACTOR = 10;
 
 function trackClientAndEmail(request: Record<string, unknown>): string {
   const body = request.body as { email?: unknown } | undefined;
-  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const email = typeof body?.email === 'string' ? normalizeEmail(body.email) : '';
   return `${String(request.ip)}|${email}`;
 }
 

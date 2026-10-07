@@ -12,6 +12,10 @@ The system SHALL accept an attempt from an unauthenticated visitor, consisting o
 - **WHEN** an unauthenticated visitor submits a complete, valid set of answers for the active quiz version
 - **THEN** the system stores an unowned attempt bound to that quiz version and returns a claim token
 
+#### Scenario: Session of an account that no longer exists
+- **WHEN** a complete, valid set of answers arrives with a valid session whose account no longer exists
+- **THEN** the system treats the caller as an unauthenticated visitor: it stores an unowned attempt and returns a claim token
+
 ### Requirement: Attempt validation
 The system SHALL reject a submission that references a quiz version that is not active, has a gender other than male or female, omits a question, answers a question twice, or uses a question key or option key that does not exist in that version. A rejected submission SHALL store nothing.
 

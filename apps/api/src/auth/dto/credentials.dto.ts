@@ -13,6 +13,8 @@ import {
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 72;
+/** Bounds the work of a sign-in request; no stored password is this long. */
+export const LOGIN_PASSWORD_MAX_LENGTH = 1024;
 
 /**
  * bcrypt reads only the first 72 bytes of its input. A longer password would
@@ -37,13 +39,20 @@ function MaxBytes(max: number, options?: ValidationOptions) {
 const emptyToUndefined = ({ value }: { value: unknown }): unknown =>
   value === null || value === '' ? undefined : value;
 
-const normalizeEmail = ({ value }: { value: unknown }): unknown =>
-  typeof value === 'string' ? value.normalize('NFC').trim().toLowerCase() : value;
+/** The one spelling of an email: what is stored, looked up and rate-limited. */
+export const normalizeEmail = (email: string): string =>
+  email.normalize('NFC').trim().toLowerCase();
 
-/** Sign-in accepts any non-empty password so that old or odd passwords still get a plain "invalid credentials". */
+const normalizeEmailField = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? normalizeEmail(value) : value;
+
+/**
+ * Sign-in does not repeat the registration rules, so that an old or odd
+ * password gets a plain "invalid credentials"; it only bounds the size.
+ */
 export class LoginDto implements CredentialsRequest {
   @ApiProperty({ example: 'user@example.com' })
-  @Transform(normalizeEmail)
+  @Transform(normalizeEmailField)
   @IsEmail()
   @MaxLength(254)
   email!: string;
@@ -51,8 +60,7 @@ export class LoginDto implements CredentialsRequest {
   @ApiProperty({ example: 'correct horse battery' })
   @IsString()
   @MinLength(1)
-  @MaxLength(PASSWORD_MAX_LENGTH)
-  @MaxBytes(PASSWORD_MAX_LENGTH)
+  @MaxLength(LOGIN_PASSWORD_MAX_LENGTH)
   password!: string;
 
   @ApiPropertyOptional({
@@ -69,7 +77,7 @@ export class LoginDto implements CredentialsRequest {
 
 export class RegisterDto implements CredentialsRequest {
   @ApiProperty({ example: 'user@example.com' })
-  @Transform(normalizeEmail)
+  @Transform(normalizeEmailField)
   @IsEmail()
   @MaxLength(254)
   email!: string;

@@ -5,6 +5,7 @@ import { DataSource, type EntityManager, Repository } from 'typeorm';
 
 import { ApiException } from '../common/api.exception';
 import { QuizService } from '../quiz/quiz.service';
+import { User } from '../users/user.entity';
 import { Attempt } from './attempt.entity';
 import { AttemptAnswer } from './attempt-answer.entity';
 import { findAnswerProblems } from './attempt-validation';
@@ -43,7 +44,13 @@ export class AttemptsService {
       throw new ApiException(HttpStatus.BAD_REQUEST, 'ATTEMPT_INVALID', problems);
     }
 
-    const claimToken = userId === null ? generateClaimToken() : null;
+    // A session can outlive its account (the token is stateless). Such a caller
+    // is an anonymous visitor: the result is kept and can be claimed on sign-up.
+    const ownerId =
+      userId !== null && (await this.dataSource.getRepository(User).existsBy({ id: userId }))
+        ? userId
+        : null;
+    const claimToken = ownerId === null ? generateClaimToken() : null;
 
     // Attempt and answers are written together or not at all.
     await this.dataSource.transaction(async (manager) => {
@@ -54,7 +61,7 @@ export class AttemptsService {
         .values({
           quizVersionId: version.id,
           gender: request.gender,
-          userId,
+          userId: ownerId,
           claimTokenHash: claimToken === null ? null : hashClaimToken(claimToken),
           // The database clock sets the expiry because the database clock checks it.
           claimExpiresAt:

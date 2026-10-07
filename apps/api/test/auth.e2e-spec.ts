@@ -369,6 +369,20 @@ describe('Authentication (e2e)', () => {
       expect(wrongPassword.headers['set-cookie']).toBeUndefined();
     });
 
+    it('treats a password longer than any stored one as a wrong password', async () => {
+      // bcrypt would read only the first 72 bytes and find them correct.
+      const longest = 'a'.repeat(72);
+      await register(app, EMAIL, undefined, longest);
+
+      const response = await http()
+        .post('/api/auth/login')
+        .send({ email: EMAIL, password: `${longest}a` })
+        .expect(401);
+
+      expect((response.body as ApiErrorBody).code).toBe('INVALID_CREDENTIALS');
+      await login(app, EMAIL, undefined, longest);
+    });
+
     it('claims an attempt taken while signed out and makes it current', async () => {
       const registered = await register(app, EMAIL, await finishQuiz('strongly_disagree'));
 
@@ -477,6 +491,22 @@ describe('Authentication (e2e)', () => {
       expect((response.body as { claimToken: string | null }).claimToken).toEqual(
         expect.any(String),
       );
+    });
+
+    it('treats a session whose account no longer exists as an anonymous submission', async () => {
+      const { cookie } = await register(app, EMAIL);
+      await dataSource.query(`DELETE FROM users`);
+
+      const response = await http()
+        .post('/api/attempts')
+        .set('Cookie', cookie)
+        .send(buildSubmission(quiz))
+        .expect(201);
+
+      // The result is not lost: a new account can claim it.
+      const { claimToken } = response.body as { claimToken: string };
+      const { body } = await register(app, 'new@example.com', claimToken);
+      expect(body).toMatchObject({ hasAttempt: true, attemptClaimed: true });
     });
   });
 

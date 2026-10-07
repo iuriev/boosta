@@ -9,6 +9,7 @@ import { AttemptsService } from '../attempts/attempts.service';
 import { ApiException } from '../common/api.exception';
 import type { Env } from '../config/env';
 import { User } from '../users/user.entity';
+import { PASSWORD_MAX_LENGTH } from './dto/credentials.dto';
 import type { SessionPayload } from './session';
 
 export interface AuthResult {
@@ -93,7 +94,10 @@ export class AuthService {
       request.password,
       user?.passwordHash ?? (await this.decoyHash),
     );
-    if (!user || !passwordMatches) {
+    // bcrypt compares only the first 72 bytes, and no stored password is
+    // longer, so a longer one is wrong even when its beginning matches.
+    const tooLong = Buffer.byteLength(request.password) > PASSWORD_MAX_LENGTH;
+    if (!user || !passwordMatches || tooLong) {
       // The same response for an unknown email and a wrong password.
       throw new ApiException(
         HttpStatus.UNAUTHORIZED,

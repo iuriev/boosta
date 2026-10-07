@@ -52,6 +52,16 @@ describe('Throttling of credential endpoints (e2e)', () => {
     await attemptLogin('203.0.113.15', ' victim@example.COM ').expect(429);
   });
 
+  it('treats the same email in another Unicode form as the same account', async () => {
+    const composed = 'jos\u00e9@example.com';
+    const decomposed = 'jose\u0301@example.com';
+    for (let attempt = 0; attempt < LIMIT; attempt += 1) {
+      await attemptLogin('203.0.113.17', composed).expect(401);
+    }
+
+    await attemptLogin('203.0.113.17', decomposed).expect(429);
+  });
+
   it('counts each client separately', async () => {
     await attemptLogin('203.0.113.20').expect(401);
   });
