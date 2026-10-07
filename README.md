@@ -164,9 +164,9 @@ Each of these is explained in [docs/architecture.md](docs/architecture.md#trade-
 
 ## Tests
 
-- **API:** 73 unit tests (scoring, report engine, validation, guards) and 146 end-to-end tests that
+- **API:** 73 unit tests (scoring, report engine, validation, guards) and 149 end-to-end tests that
   run the real application against PostgreSQL, including the database constraints and triggers.
-- **Web:** 79 component and unit tests (quiz flow, forms, report blocks, storage, proxy) and a
+- **Web:** 83 component and unit tests (quiz flow, forms, report blocks, storage, proxy) and a
   browser test of the whole funnel at desktop and mobile sizes.
 
 ## More

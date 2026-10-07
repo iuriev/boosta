@@ -45,17 +45,28 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
   const questionRef = useRef<HTMLLegendElement>(null);
   const optionIdPrefix = useId();
   const previousIndex = useRef<number | undefined>(undefined);
-  // Set once the quiz is being left on purpose, so that clearing the stored
-  // progress does not also trigger the "nothing to show" redirect below.
-  const [leaving, setLeaving] = useState(false);
+  // True once this page has shown the quiz or has sent the visitor away.
+  const settled = useRef(false);
 
   useEffect(() => {
-    if (isClient && !progress && !leaving) {
-      // No gender chosen yet, or the saved answers belong to a replaced quiz.
-      clearQuizProgress();
-      router.replace(ROUTES.start);
+    if (!isClient) {
+      return;
     }
-  }, [isClient, progress, leaving, router]);
+    if (progress) {
+      settled.current = true;
+      return;
+    }
+    if (saved === null && settled.current) {
+      // Progress that was here and is gone was cleared on purpose (answers
+      // submitted, signed out) by code that navigates itself; a redirect from
+      // here would replace that navigation.
+      return;
+    }
+    // No gender chosen yet, or the saved answers belong to a replaced quiz.
+    settled.current = true;
+    clearQuizProgress();
+    router.replace(ROUTES.start);
+  }, [isClient, progress, saved, router]);
 
   const total = quiz.questions.length;
   // A stored index is never trusted to be inside the current quiz.
@@ -118,7 +129,6 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
     setError(null);
     try {
       const { claimToken } = await attemptsService.submit(request);
-      setLeaving(true);
       clearQuizProgress();
       if (claimToken === null) {
         // Signed in: the attempt already belongs to the account.
@@ -134,7 +144,6 @@ export function QuizFlow({ quiz, headerActions }: QuizFlowProps) {
     } catch (caught) {
       if (caught instanceof ApiError && caught.code === 'QUIZ_VERSION_OUTDATED') {
         // The quiz was replaced while it was being taken: start over with the new one.
-        setLeaving(true);
         clearQuizProgress();
         router.replace(startWithNotice('quiz-updated'));
         // Drops the pages the router has cached with the replaced quiz: a

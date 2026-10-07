@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +8,7 @@ import { QUIZ } from '@/test/fixtures';
 import { router } from '@/test/router';
 
 import {
+  clearQuizProgress,
   loadClaimToken,
   loadQuizProgress,
   type QuizProgress,
@@ -136,10 +137,21 @@ describe('QuizFlow', () => {
       expect(screen.queryByRole('group')).not.toBeInTheDocument();
     });
 
+    it('leaves the navigation to whoever cleared the progress, such as signing out', () => {
+      renderQuiz();
+
+      act(() => {
+        clearQuizProgress();
+      });
+
+      expect(router.replace).not.toHaveBeenCalled();
+      expect(screen.queryByRole('group')).not.toBeInTheDocument();
+    });
+
     it('discards answers that belong to a replaced quiz version', () => {
       renderQuiz({ quizVersionId: 'version-0', answers: { focus: 'agree' } });
 
-      expect(router.replace).toHaveBeenCalledWith('/');
+      expect(router.replace).toHaveBeenCalledExactlyOnceWith('/');
       expect(loadQuizProgress()).toBeNull();
     });
 

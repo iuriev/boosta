@@ -21,7 +21,8 @@ export const signUpSchema = z.object({
 /** Sign-in does not repeat the sign-up rules: a wrong password is the API's to judge. */
 export const signInSchema = z.object({
   email,
-  password: z.string().min(1, 'Enter your password'),
+  // The upper bound is the API's limit on the request, not a password rule.
+  password: z.string().min(1, 'Enter your password').max(1024, 'This password is too long'),
 });
 
 export type Credentials = z.infer<typeof signUpSchema>;

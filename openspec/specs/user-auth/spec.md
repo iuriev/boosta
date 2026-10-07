@@ -68,6 +68,10 @@ The system SHALL start a session for a request with an email and password that m
 - **WHEN** a sign-in request has an unknown email or a wrong password
 - **THEN** the system rejects it with a generic invalid-credentials error
 
+#### Scenario: Password longer than an account can have
+- **WHEN** a sign-in request has a password longer than the registration limit, even one that begins with the account's password
+- **THEN** the system rejects it with the same generic invalid-credentials error
+
 ### Requirement: Session cookie
 The system SHALL carry the session in a cookie that is not readable by scripts, is sent only on same-site requests and expires after 7 days. In production it SHALL be marked secure unless the deployment explicitly turns that off to serve plain HTTP, as the local container setup does. Passwords SHALL be stored only as salted hashes.
 
@@ -85,6 +89,10 @@ The system SHALL end the session on sign-out by clearing the session cookie.
 #### Scenario: User signs out
 - **WHEN** a signed-in user signs out
 - **THEN** the session cookie is cleared and a later report request is rejected as unauthenticated
+
+#### Scenario: User signs out in the middle of the quiz
+- **WHEN** a signed-in user signs out on the quiz screen
+- **THEN** the answers given so far are discarded and the sign-in screen opens
 
 ### Requirement: Users access only their own data
 The system SHALL serve report and account data only for the authenticated user of the request, and SHALL NOT accept a user or attempt identifier from the client to select whose report is returned.

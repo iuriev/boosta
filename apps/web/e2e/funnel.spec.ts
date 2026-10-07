@@ -62,6 +62,16 @@ test('quiz, account, report, sign out, sign in, retake', async ({ page }) => {
     await expect(page.getByRole('figure')).toContainText('70 / 100');
   });
 
+  await test.step('a signed-in user is offered the report, not the account forms', async () => {
+    await page.goto('/');
+    await expect(page.getByRole('link', { name: 'My report' })).toBeVisible();
+
+    for (const path of ['/signin', '/signup']) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/report$/);
+    }
+  });
+
   await test.step('a retake while signed in replaces the report without asking to register', async () => {
     await page.getByRole('link', { name: 'Retake test' }).click();
     await takeQuiz(page, 'Male', Array<string>(5).fill('Disagree'));
@@ -112,10 +122,30 @@ test('an account created before the quiz gets its report right after the quiz', 
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page).toHaveURL(/\/$/);
 
+  await test.step('without a report yet, the report page leads to the quiz', async () => {
+    await page.goto('/report');
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  });
+
   await takeQuiz(page, 'Female', Array<string>(5).fill('Strongly agree'));
 
   await expect(page).toHaveURL(/\/report$/);
   await expect(page.getByRole('figure')).toContainText('100 / 100');
+});
+
+test('signing out in the middle of the quiz opens sign-in', async ({ page }) => {
+  await page.goto('/signup');
+  await fillCredentials(page, newEmail('sign-out-mid-quiz'));
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.getByRole('button', { name: 'Female', exact: true }).click();
+  await expect(page).toHaveURL(/\/quiz$/);
+
+  await page.getByRole('button', { name: 'Sign out' }).click();
+
+  await expect(page).toHaveURL(/\/signin$/);
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
 });
 
 test('pages fit the viewport without horizontal scrolling', async ({ page }) => {
