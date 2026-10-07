@@ -1,21 +1,23 @@
 import './globals.css';
 
 import type { Metadata, Viewport } from 'next';
-import { Geologica, Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import type { ReactNode } from 'react';
 
-// next/font self-hosts the files and generates metric-matched fallbacks, so
-// text does not shift when the web fonts arrive.
-const geologica = Geologica({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
+// The font files are in the repository (variable fonts, Latin subset, from
+// Fontsource), so a build never depends on a font service being reachable.
+// next/font generates metric-matched fallbacks, so text does not shift when
+// the web fonts arrive.
+const geologica = localFont({
+  src: './fonts/geologica-latin-wght-normal.woff2',
+  weight: '100 900',
   variable: '--font-geologica',
   display: 'swap',
 });
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const inter = localFont({
+  src: './fonts/inter-latin-wght-normal.woff2',
+  weight: '100 900',
   variable: '--font-inter',
   display: 'swap',
 });
